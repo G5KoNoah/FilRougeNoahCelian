@@ -1,47 +1,108 @@
 package ca.uqac.mobile.projetfilrouge
 
+import androidx.compose.foundation.Image
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("Create","OnCreate")
         enableEdgeToEdge()
         setContent {
             ProjetFilRougeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    Column(modifier = Modifier.fillMaxSize().padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Logo(modifier = Modifier, verticalArrangement = Arrangement.Center)
+                        Form(modifier = Modifier)
+                    }
                 }
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("Start", "OnStart")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("Pause", "OnPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("Stop", "OnStop")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("Resume", "OnResume")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d("Restart", "OnRestart")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("Destroy", "OnDestroy")
+    }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun Logo(modifier: Modifier, verticalArrangement: Arrangement.Vertical) {
+    Column(modifier = modifier, verticalArrangement = verticalArrangement) {
+        Image(
+            painter = painterResource(id = R.drawable.uqac),
+            contentDescription = "C'est l'école"
+        )
+    }
+
+
+}
+
+@Composable
+fun Form(modifier: Modifier = Modifier){
+    var text1 =""
+    var text2 =""
+    Column(modifier = modifier.background(color = Color.Gray).padding(top = 50.dp)) {
+        Text("Login")
+        TextField( value = text1, onValueChange = { text1 = it})
+        Text("Password")
+        TextField( value = text2, onValueChange = { text2 = it})
+        Button(onClick = { }) {
+            Text(text = "Cliquez-moi")
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ProjetFilRougeTheme {
-        Greeting("Android")
+        //Greeting("Android")
     }
 }
