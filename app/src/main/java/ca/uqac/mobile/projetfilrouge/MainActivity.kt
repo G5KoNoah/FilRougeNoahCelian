@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ca.uqac.mobile.projetfilrouge.ui.screen.WelcomeScreen
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 
 class MainActivity : ComponentActivity() {
@@ -31,12 +32,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjetFilRougeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(modifier = Modifier.fillMaxSize().padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Logo(modifier = Modifier, verticalArrangement = Arrangement.Center)
-                        Form(modifier = Modifier)
-                    }
-                }
+                WelcomeScreen()
             }
         }
     }
@@ -72,37 +68,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Logo(modifier: Modifier, verticalArrangement: Arrangement.Vertical) {
-    Column(modifier = modifier, verticalArrangement = verticalArrangement) {
-        Image(
-            painter = painterResource(id = R.drawable.uqac),
-            contentDescription = "C'est l'école"
-        )
-    }
 
-
-}
-
-@Composable
-fun Form(modifier: Modifier = Modifier){
-    var text1 =""
-    var text2 =""
-    Column(modifier = modifier.background(color = Color.Gray).padding(top = 50.dp)) {
-        Text("Login")
-        TextField( value = text1, onValueChange = { text1 = it})
-        Text("Password")
-        TextField( value = text2, onValueChange = { text2 = it})
-        Button(onClick = { }) {
-            Text(text = "Cliquez-moi")
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ProjetFilRougeTheme {
-        //Greeting("Android")
+        WelcomeScreen()
     }
 }
