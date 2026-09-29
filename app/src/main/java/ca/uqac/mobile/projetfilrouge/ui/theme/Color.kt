@@ -15,3 +15,7 @@ val LightCard = Color(0xFFFFFFFF)
 val LightCardHighlight = Color(0xFFE0E0E0)
 val LightText = Color(0xFF1C1C1C)
 val LightTextSecondary = Color(0xFF6B6B6B)
+
+val VoteFor = Color(0xFF4B3FD9)
+val VoteAgainst = Color(0xFFD10000)
+val VoteCircle = Color(0xFFB3B3B6)
