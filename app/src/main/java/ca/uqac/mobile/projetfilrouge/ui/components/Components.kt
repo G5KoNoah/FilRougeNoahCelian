@@ -15,11 +15,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.PermContactCalendar
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -108,6 +112,20 @@ fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun BackHeader(title: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
+        IconButton(onClick = {}, modifier = Modifier.align(Alignment.CenterStart)) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+        }
+        ScreenTitle(title, Modifier.align(Alignment.Center))
+    }
+}
+
+@Composable
 fun AppCard(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
@@ -119,6 +137,21 @@ fun AppCard(
         color = MaterialTheme.colorScheme.surface,
     ) {
         Column(Modifier.padding(contentPadding), content = content)
+    }
+}
+
+@Composable
+fun PrimaryButton(
+    text: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimary,
+) {
+    Button(
+        onClick = {},
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(contentColor = contentColor),
+    ) {
+        Text(text, fontWeight = FontWeight.Bold)
     }
 }
 
