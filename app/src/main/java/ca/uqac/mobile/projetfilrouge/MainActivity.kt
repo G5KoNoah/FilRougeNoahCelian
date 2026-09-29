@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 
@@ -17,8 +18,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjetFilRougeTheme {
-                LoginScreen()
+                //LoginScreen()
                 //SignScreen()
+                AccountScreen()
             }
         }
     }
