@@ -1,6 +1,7 @@
 package ca.uqac.mobile.projetfilrouge.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,14 +15,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.PermContactCalendar
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,17 +36,23 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 val CardShape = RoundedCornerShape(12.dp)
+private val PillShape = RoundedCornerShape(8.dp)
 
 enum class NavTab(val icon: ImageVector, val label: String) {
     Alarms(Icons.Outlined.Alarm, "Alarmes"),
@@ -156,6 +167,24 @@ fun PrimaryButton(
 }
 
 @Composable
+fun SecondaryButton(
+    text: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    Button(
+        onClick = {},
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = contentColor,
+        ),
+    ) {
+        Text(text, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
 fun SmallSwitch(checked: Boolean) {
     Switch(
         checked = checked,
@@ -163,6 +192,16 @@ fun SmallSwitch(checked: Boolean) {
         modifier = Modifier.scale(0.7f),
         colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary),
     )
+}
+
+@Composable
+fun SwitchRow(label: String, checked: Boolean, modifier: Modifier = Modifier) {
+    AppCard(modifier, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+            SmallSwitch(checked)
+        }
+    }
 }
 
 @Composable
@@ -174,6 +213,77 @@ fun MemberAvatars(count: Int, modifier: Modifier = Modifier) {
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
             )
+        }
+    }
+}
+
+@Composable
+fun PillTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+) {
+    val textStyle = MaterialTheme.typography.bodyMedium.copy(
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center,
+    )
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        textStyle = textStyle,
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(PillShape)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        decorationBox = { innerTextField ->
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                if (value.isEmpty()) Text(placeholder, style = textStyle)
+                innerTextField()
+            }
+        },
+    )
+}
+
+@Composable
+fun PillDropdown(
+    label: String,
+    options: List<String>,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(PillShape)
+                .background(MaterialTheme.colorScheme.background)
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                label,
+                Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, Modifier.size(20.dp))
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onSelect(option)
+                        expanded = false
+                    },
+                )
+            }
         }
     }
 }
