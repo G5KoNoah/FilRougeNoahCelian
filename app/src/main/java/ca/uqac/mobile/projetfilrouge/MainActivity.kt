@@ -8,7 +8,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmEditScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,9 +21,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjetFilRougeTheme {
-                //LoginScreen()
+                LoginScreen()
                 //SignScreen()
-                AccountScreen()
+                //AccountScreen()
+                //AlarmsScreen()
+                //AlarmEditScreen()
+                //VoteRoomScreen()
             }
         }
     }

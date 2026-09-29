@@ -27,6 +27,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,10 +53,10 @@ private val PollDurations = listOf("2 min", "5 min", "10 min")
 
 @Composable
 fun AlarmEditScreen() {
-    var name by remember { mutableStateOf("") }
-    var ringtone by remember { mutableStateOf<String?>(null) }
-    var snooze by remember { mutableStateOf("2 x 3 min") }
-    var pollDuration by remember { mutableStateOf<String?>(null) }
+    var name by rememberSaveable() { mutableStateOf("") }
+    var ringtone by rememberSaveable { mutableStateOf<String?>(null) }
+    var snooze by rememberSaveable { mutableStateOf("2 x 3 min") }
+    var pollDuration by rememberSaveable { mutableStateOf<String?>(null) }
 
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
