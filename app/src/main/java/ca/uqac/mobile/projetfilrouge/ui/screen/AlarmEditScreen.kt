@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatars
 import ca.uqac.mobile.projetfilrouge.ui.components.PillDropdown
@@ -46,18 +47,13 @@ import ca.uqac.mobile.projetfilrouge.ui.components.ScreenLayout
 import ca.uqac.mobile.projetfilrouge.ui.components.SecondaryButton
 import ca.uqac.mobile.projetfilrouge.ui.components.SwitchRow
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
+import ca.uqac.mobile.projetfilrouge.viewModel.AlarmEditViewModel
 
-private val Ringtones = listOf("Classique", "Radar", "Carillon", "Réveil doux")
-private val SnoozeOptions = listOf("1 x 5 min", "2 x 3 min", "3 x 5 min")
-private val PollDurations = listOf("2 min", "5 min", "10 min")
+
 
 @Composable
 fun AlarmEditScreen() {
-    var name by rememberSaveable() { mutableStateOf("") }
-    var ringtone by rememberSaveable { mutableStateOf<String?>(null) }
-    var snooze by rememberSaveable { mutableStateOf("2 x 3 min") }
-    var pollDuration by rememberSaveable { mutableStateOf<String?>(null) }
-
+    val viewModel : AlarmEditViewModel = viewModel()
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -65,17 +61,17 @@ fun AlarmEditScreen() {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TimeSelector()
                     DaysRow()
-                    PillTextField(value = name, onValueChange = { name = it }, placeholder = "Alarm name")
-                    PillDropdown(ringtone ?: "Ringtone", Ringtones, onSelect = { ringtone = it })
-                    PillDropdown(snooze, SnoozeOptions, onSelect = { snooze = it })
+                    PillTextField(value = viewModel.name, onValueChange = { viewModel.onNameChange(it) }, placeholder = "Alarm name")
+                    PillDropdown(viewModel.ringtone ?: "Ringtone", viewModel.ringtones, onSelect = { viewModel.onRingtoneSelected(it) })
+                    PillDropdown(viewModel.snooze, viewModel.snoozeOptions, onSelect = { viewModel.onSnoozeSelected(it) })
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         PillDropdown(
-                            pollDuration ?: "Poll duration",
-                            PollDurations,
-                            onSelect = { pollDuration = it },
+                            viewModel.pollDuration ?: "Poll duration",
+                            viewModel.pollDurations,
+                            onSelect = { viewModel.onPollDurationSelected(it) },
                             modifier = Modifier.weight(1f),
                         )
                         PrimaryButton("Start poll")

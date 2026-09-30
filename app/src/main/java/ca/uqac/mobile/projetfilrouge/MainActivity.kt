@@ -21,12 +21,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjetFilRougeTheme {
-                LoginScreen()
+               //LoginScreen()
                 //SignScreen()
                 //AccountScreen()
                 //AlarmsScreen()
                 //AlarmEditScreen()
                 //VoteRoomScreen()
+                NavGraph()
             }
         }
     }
@@ -68,6 +69,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     ProjetFilRougeTheme {
-        LoginScreen()
+        //LoginScreen()
     }
 }
