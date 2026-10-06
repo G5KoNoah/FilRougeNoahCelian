@@ -35,11 +35,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun LoginScreen (onSignUp:()-> Unit){
+fun LoginScreen (onSignUp:()-> Unit, onLogin: () -> Unit){
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
             Logo(modifier = Modifier.padding(top = 200.dp), verticalArrangement = Arrangement.Center)
-            FormLogin(modifier = Modifier.padding(top = 100.dp), onSignUp)
+            FormLogin(modifier = Modifier.padding(top = 100.dp), onSignUp, onLogin)
         }
     }
 }
@@ -57,7 +57,7 @@ fun Logo(modifier: Modifier, verticalArrangement: Arrangement.Vertical) {
 }
 
 @Composable
-fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit) {
+fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()-> Unit) {
     var emailText by rememberSaveable { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
     val forme = RoundedCornerShape(16.dp)
@@ -96,7 +96,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { },
+            onClick = { onLogin() },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(

@@ -52,7 +52,7 @@ import ca.uqac.mobile.projetfilrouge.viewModel.AlarmEditViewModel
 
 
 @Composable
-fun AlarmEditScreen() {
+fun AlarmEditScreen(onBackScreen: ()-> Unit) {
     val viewModel : AlarmEditViewModel = viewModel()
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
@@ -100,7 +100,7 @@ fun AlarmEditScreen() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         ) {
-            SecondaryButton("Cancel")
+            SecondaryButton("Cancel", onClick = onBackScreen)
             PrimaryButton("Save")
         }
     }
@@ -189,5 +189,5 @@ private fun DaysRow() {
 @Preview(showSystemUi = true)
 @Composable
 private fun AlarmEditScreenPreview() {
-    ProjetFilRougeTheme { AlarmEditScreen() }
+    ProjetFilRougeTheme { AlarmEditScreen({}) }
 }

@@ -153,9 +153,10 @@ fun PrimaryButton(
     text: String,
     modifier: Modifier = Modifier,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
+    onClick: ()-> Unit = {}
 ) {
     Button(
-        onClick = {},
+        onClick = {onClick()},
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(contentColor = contentColor),
     ) {
@@ -168,9 +169,10 @@ fun SecondaryButton(
     text: String,
     modifier: Modifier = Modifier,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    onClick: ()-> Unit = {}
 ) {
     Button(
-        onClick = {},
+        onClick = {onClick()},
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surface,

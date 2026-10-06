@@ -15,11 +15,13 @@ import androidx.navigation.compose.rememberNavController
 import ca.uqac.mobile.projetfilrouge.ui.components.BottomNavBar
 import ca.uqac.mobile.projetfilrouge.ui.components.NavTab
 import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.AddContactScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmEditScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.ContactsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.SignScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
 
 @Composable
 fun NavGraph() {
@@ -56,22 +58,35 @@ fun NavGraph() {
             composable("login") {
                 LoginScreen(onSignUp = {
                     navController.navigate("sign")
-                })
+                },
+                    onLogin = {
+                        navController.navigate(NavTab.Alarms.route)
+                    })
             }
             composable("sign") {
                 SignScreen()
             }
             composable("alarmEdit") {
-                AlarmEditScreen()
+                AlarmEditScreen( onBackScreen = {
+                    navController.popBackStack()
+                })
             }
             composable(NavTab.Alarms.route) {
-                AlarmsScreen()
+                AlarmsScreen( onAlarmEdit = {
+                    navController.navigate("alarmEdit")
+            })
             }
             composable(NavTab.Contacts.route) {
                 ContactsScreen()
             }
             composable(NavTab.Profile.route) {
                 AccountScreen()
+            }
+            composable("addContact"){
+                AddContactScreen()
+            }
+            composable("voteRoom"){
+                VoteRoomScreen()
             }
         }
     }

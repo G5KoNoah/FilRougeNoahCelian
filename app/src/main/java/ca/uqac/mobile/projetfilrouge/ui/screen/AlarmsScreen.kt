@@ -1,5 +1,6 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,12 +29,12 @@ import ca.uqac.mobile.projetfilrouge.ui.components.SmallSwitch
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 
 @Composable
-fun AlarmsScreen() {
+fun AlarmsScreen(onAlarmEdit: ()-> Unit) {
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
         ScreenTitle("Alarm in 10 hours\nand 32 minutes", Modifier.fillMaxWidth())
         IconButton(onClick = {}, modifier = Modifier.align(Alignment.End)) {
-            Icon(Icons.Outlined.AddCircleOutline, contentDescription = "Ajouter une alarme")
+            Icon(Icons.Outlined.AddCircleOutline, contentDescription = "Ajouter une alarme", Modifier.clickable {onAlarmEdit()})
         }
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             AlarmCard("09:00", enabled = true, memberCount = 1)
@@ -78,5 +79,5 @@ private fun AlarmCard(
 @Preview(showSystemUi = true)
 @Composable
 private fun AlarmsScreenPreview() {
-    ProjetFilRougeTheme { AlarmsScreen() }
+    ProjetFilRougeTheme { AlarmsScreen(onAlarmEdit = {}) }
 }
