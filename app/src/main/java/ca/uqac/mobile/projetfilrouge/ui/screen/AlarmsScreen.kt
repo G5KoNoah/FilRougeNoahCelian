@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatars
-import ca.uqac.mobile.projetfilrouge.ui.components.NavTab
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenLayout
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenTitle
 import ca.uqac.mobile.projetfilrouge.ui.components.SmallSwitch
@@ -30,7 +29,7 @@ import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 
 @Composable
 fun AlarmsScreen() {
-    ScreenLayout(selectedTab = NavTab.Alarms) {
+    ScreenLayout {
         Spacer(Modifier.height(24.dp))
         ScreenTitle("Alarm in 10 hours\nand 32 minutes", Modifier.fillMaxWidth())
         IconButton(onClick = {}, modifier = Modifier.align(Alignment.End)) {

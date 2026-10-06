@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjetFilRougeTheme {
-               //LoginScreen()
+                //LoginScreen()
                 //SignScreen()
                 //AccountScreen()
                 //AlarmsScreen()

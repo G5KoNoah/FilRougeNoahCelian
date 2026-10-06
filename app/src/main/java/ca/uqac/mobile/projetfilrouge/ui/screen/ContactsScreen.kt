@@ -21,14 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
-import ca.uqac.mobile.projetfilrouge.ui.components.NavTab
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenLayout
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenTitle
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 
 @Composable
 fun ContactsScreen() {
-    ScreenLayout(selectedTab = NavTab.Contacts) {
+    ScreenLayout {
         Spacer(Modifier.height(24.dp))
         ScreenTitle("Contacts", Modifier.fillMaxWidth())
         IconButton(onClick = {}, modifier = Modifier.align(Alignment.End)) {

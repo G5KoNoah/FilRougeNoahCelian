@@ -54,21 +54,17 @@ import androidx.compose.ui.unit.dp
 val CardShape = RoundedCornerShape(12.dp)
 private val PillShape = RoundedCornerShape(8.dp)
 
-enum class NavTab(val icon: ImageVector, val label: String) {
-    Alarms(Icons.Outlined.Alarm, "Alarmes"),
-    Contacts(Icons.Outlined.PermContactCalendar, "Contacts"),
-    Profile(Icons.Outlined.Person, "Profil"),
+enum class NavTab(val route: String, val icon: ImageVector, val label: String) {
+    Alarms("alarms", Icons.Outlined.Alarm, "Alarms"),
+    Contacts("contacts", Icons.Outlined.PermContactCalendar, "Contacts"),
+    Profile("account", Icons.Outlined.Person, "Profile"),
 }
 
 @Composable
-fun ScreenLayout(
-    selectedTab: NavTab? = null,
-    content: @Composable ColumnScope.() -> Unit,
-) {
+fun ScreenLayout(content: @Composable ColumnScope.() -> Unit) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { if (selectedTab != null) BottomNavBar(selectedTab) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -81,7 +77,7 @@ fun ScreenLayout(
 }
 
 @Composable
-fun BottomNavBar(selectedTab: NavTab) {
+fun BottomNavBar(selectedTab: NavTab, onTabSelected: (NavTab) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -102,6 +98,7 @@ fun BottomNavBar(selectedTab: NavTab) {
                             if (tab == selectedTab) MaterialTheme.colorScheme.surfaceVariant
                             else Color.Transparent
                         )
+                        .clickable { onTabSelected(tab) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Icon(tab.icon, contentDescription = tab.label)
