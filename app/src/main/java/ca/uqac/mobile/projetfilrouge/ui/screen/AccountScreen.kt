@@ -18,15 +18,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,10 +32,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.R
+import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
+
 @Composable
 fun AccountScreen() {
-    Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Color.DarkGray) { innerPadding ->
+    Scaffold(modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -58,8 +60,8 @@ fun Modifier.cardStyle(): Modifier {
     val forme = RoundedCornerShape(16.dp)
     return this
         .fillMaxWidth(0.75f)
-        .background(color = Color.Gray, shape = forme)
-        .border(width = 2.dp, color = Color.Black, shape = forme)
+        .background(color = MaterialTheme.colorScheme.surface, shape = forme)
+        .border(width = 2.dp, color = MaterialTheme.colorScheme.surfaceVariant, shape = forme)
         .padding(24.dp)
 }
 
@@ -76,43 +78,44 @@ fun MainInfo(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("FirstName", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text("SurName", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("FirstName", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("SurName", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(4.dp))
-        Text("UserID", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
+        Text("UserID", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
     }
 }
 
 @Composable
 fun OtherInfo(modifier: Modifier = Modifier) {
     Column(modifier = modifier.cardStyle()) {
-        Text("Contact", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("Contact", color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             //Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.width(12.dp))
-            Text("Mail", color = Color.White)
+            Text("Mail", color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
 
 @Composable
 fun SettingsInfo(modifier: Modifier = Modifier) {
-    var darkTheme by remember { mutableStateOf(true) }
-
+    val viewModel: SettingsViewModel = viewModel()
+    val estSombre by viewModel.estSombre.collectAsStateWithLifecycle()
     Column(modifier = modifier.cardStyle()) {
-        Text("Settings", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("Settings", color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Theme :", color = Color.White)
+            Text("Theme :", color = MaterialTheme.colorScheme.onSurface)
             Switch(
-                checked = darkTheme,
-                onCheckedChange = { darkTheme = it },
+                checked = estSombre,
+                onCheckedChange = { nouvelleValeur ->
+                    viewModel.basculerThemeSombre(nouvelleValeur) },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = Color.Black

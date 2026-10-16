@@ -1,10 +1,11 @@
 package ca.uqac.mobile.projetfilrouge.viewModel
 
+import android.app.Application
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +23,7 @@ class PreferencesManager(private val context: Context) {
     val estSombre: Flow<Boolean> =
         context.dataStore.data
             .map {
-                    preferences -> preferences[CLE_EST_SOMBRE] ?: false
+                    preferences -> preferences[CLE_EST_SOMBRE] ?: true
             }
     // Écrire la préférence
     suspend fun definirThemeSombre(sombre: Boolean) {
@@ -33,13 +34,15 @@ class PreferencesManager(private val context: Context) {
 }
 
 
-class SettingsViewModel(private val preferencesManager: PreferencesManager
-) : ViewModel() {
+// AndroidViewModel : la factory par défaut sait lui passer l'Application, pas besoin d'en écrire une
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val preferencesManager = PreferencesManager(application)
+
     val estSombre: StateFlow<Boolean> =
         preferencesManager.estSombre.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            false
+            true
         )
     fun basculerThemeSombre(sombre: Boolean) {
         viewModelScope.launch {
