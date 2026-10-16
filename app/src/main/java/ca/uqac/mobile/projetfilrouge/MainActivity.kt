@@ -23,11 +23,11 @@ class MainActivity : ComponentActivity() {
             ProjetFilRougeTheme {
                //LoginScreen()
                 //SignScreen()
-                //AccountScreen()
+                AccountScreen()
                 //AlarmsScreen()
                 //AlarmEditScreen()
                 //VoteRoomScreen()
-                NavGraph()
+                //NavGraph()
             }
         }
     }
