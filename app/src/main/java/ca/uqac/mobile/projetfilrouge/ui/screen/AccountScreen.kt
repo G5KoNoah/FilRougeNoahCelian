@@ -36,6 +36,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.R
 import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun AccountScreen() {
@@ -101,6 +103,7 @@ fun OtherInfo(modifier: Modifier = Modifier) {
 
 @Composable
 fun SettingsInfo(modifier: Modifier = Modifier) {
+    val auth = Firebase.auth
     val viewModel: SettingsViewModel = viewModel()
     val estSombre by viewModel.estSombre.collectAsStateWithLifecycle()
     Column(modifier = modifier.cardStyle()) {
@@ -124,7 +127,7 @@ fun SettingsInfo(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = { },
+            onClick = { auth.signOut()},
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(

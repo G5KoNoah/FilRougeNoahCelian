@@ -14,6 +14,7 @@ import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmEditScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.SignScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
@@ -30,11 +31,11 @@ class MainActivity : ComponentActivity() {
             ProjetFilRougeTheme(darkTheme = estSombre) {
                //LoginScreen()
                 //SignScreen()
-                AccountScreen()
+                //AccountScreen()
                 //AlarmsScreen()
                 //AlarmEditScreen()
                 //VoteRoomScreen()
-                //NavGraph()
+                NavGraph()
             }
         }
     }

@@ -33,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun LoginScreen (onSignUp:()-> Unit){
@@ -61,7 +63,9 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit) {
     var emailText by rememberSaveable { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
     val forme = RoundedCornerShape(16.dp)
-
+    var message by remember { mutableStateOf<String?>(null) }
+    var estErreur by remember { mutableStateOf(false) }
+    val auth = Firebase.auth
     Column(
         modifier = modifier
             .fillMaxWidth(0.75f)
@@ -94,9 +98,25 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit) {
             visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(24.dp))
-
         Button(
-            onClick = { },
+            onClick = {
+                // Firebase plante si un champ est vide : on vérifie avant
+                if (emailText.isBlank() || passwordText.isEmpty()) {
+                    estErreur = true
+                    message = "Remplis le mail et le mot de passe"
+                    return@Button
+                }
+                message = null
+                auth.signInWithEmailAndPassword(emailText.trim(), passwordText)
+                    .addOnSuccessListener {
+                        estErreur = false
+                        message = "Connexion compte reussi"
+                    }
+                    .addOnFailureListener { e ->
+                        estErreur = true
+                        message = e.localizedMessage ?: "Erreur connexion"
+                    }
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(
@@ -108,6 +128,14 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit) {
                 modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
                 fontSize = 20.sp,
                 color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        message?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = it,
+                color = if (estErreur) Color.Red else Color.Green,
                 fontWeight = FontWeight.Bold
             )
         }
