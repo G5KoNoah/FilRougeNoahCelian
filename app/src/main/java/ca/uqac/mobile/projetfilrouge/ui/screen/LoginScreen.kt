@@ -111,6 +111,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
                     .addOnSuccessListener {
                         estErreur = false
                         message = "Connexion compte reussi"
+                        onLogin()
                     }
                     .addOnFailureListener { e ->
                         estErreur = true

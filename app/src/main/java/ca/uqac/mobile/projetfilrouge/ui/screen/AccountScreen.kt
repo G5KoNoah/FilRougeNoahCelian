@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -40,7 +39,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 @Composable
-fun AccountScreen() {
+fun AccountScreen(onLogout: () -> Unit) {
     Scaffold(modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier = Modifier
@@ -52,7 +51,7 @@ fun AccountScreen() {
         ) {
             MainInfo()
             OtherInfo()
-            SettingsInfo()
+            SettingsInfo(onLogout = onLogout)
         }
     }
 }
@@ -102,7 +101,7 @@ fun OtherInfo(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SettingsInfo(modifier: Modifier = Modifier) {
+fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
     val auth = Firebase.auth
     val viewModel: SettingsViewModel = viewModel()
     val estSombre by viewModel.estSombre.collectAsStateWithLifecycle()
@@ -127,7 +126,8 @@ fun SettingsInfo(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = { auth.signOut()},
+            onClick = { auth.signOut()
+                      onLogout()},
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(

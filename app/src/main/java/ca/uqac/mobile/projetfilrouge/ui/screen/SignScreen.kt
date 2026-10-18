@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -34,7 +35,7 @@ import com.google.firebase.auth.auth
 
 @Composable
 fun SignScreen (){
-    Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Color.DarkGray) { innerPadding ->
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
             Logo(modifier = Modifier.padding(top = 200.dp), verticalArrangement = Arrangement.Center)
             FormSign(modifier = Modifier.padding(top = 100.dp))
@@ -57,8 +58,8 @@ fun FormSign(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth(0.75f)
-            .background(color = Color.Gray, shape = forme)
             .border(width = 2.dp, color = Color.Black, shape = forme)
+            .background(color = MaterialTheme.colorScheme.surface, shape = forme)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

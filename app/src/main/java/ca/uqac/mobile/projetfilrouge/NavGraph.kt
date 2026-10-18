@@ -6,8 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -16,20 +16,21 @@ import ca.uqac.mobile.projetfilrouge.ui.components.BottomNavBar
 import ca.uqac.mobile.projetfilrouge.ui.components.NavTab
 import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AddContactScreen
-import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmEditScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.ContactsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.SignScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 @Composable
 fun NavGraph() {
-    val auth = Firebase.auth
-    val utilisateurActuel = auth.currentUser
-    var identifiant = ""
+    // Déjà connecté -> on démarre directement sur les alarmes. Calculé une seule fois.
+    val startDestination = remember {
+        if (Firebase.auth.currentUser != null) NavTab.Alarms.route else "login"
+    }
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTab = NavTab.entries.find { it.route == backStackEntry?.destination?.route }
@@ -42,7 +43,7 @@ fun NavGraph() {
                     selectedTab = currentTab,
                     onTabSelected = { tab ->
                         navController.navigate(tab.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
+                            popUpTo(NavTab.Alarms.route) {
                                 saveState = true
                             }
                             launchSingleTop = true
@@ -55,21 +56,20 @@ fun NavGraph() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = login,
+            startDestination = startDestination,
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding),
         ) {
             composable("login") {
-                if (utilisateurActuel != null) {
-                    identifiant = utilisateurActuel.uid
-                    navController.navigate("account")
-                } else {
-                    LoginScreen(onSignUp = {
-                        navController.navigate("sign")
+                LoginScreen(onSignUp = {
+                    navController.navigate("sign")
+                },
+                    onLogin = {
+                        navController.navigate(NavTab.Alarms.route) {
+                            popUpTo("login") { inclusive = true }
+                        }
                     })
-                }
-
             }
             composable("sign") {
                 SignScreen()
@@ -88,7 +88,11 @@ fun NavGraph() {
                 ContactsScreen()
             }
             composable(NavTab.Profile.route) {
-                AccountScreen()
+                AccountScreen(onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                })
             }
             composable("addContact"){
                 AddContactScreen()
@@ -96,9 +100,6 @@ fun NavGraph() {
             composable("voteRoom"){
                 VoteRoomScreen()
             }
-        }
-        composable ( "account" ){
-            AccountScreen()
         }
     }
 }
