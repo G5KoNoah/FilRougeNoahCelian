@@ -16,15 +16,20 @@ import ca.uqac.mobile.projetfilrouge.ui.components.BottomNavBar
 import ca.uqac.mobile.projetfilrouge.ui.components.NavTab
 import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AddContactScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmEditScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.ContactsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.SignScreen
-import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun NavGraph() {
+    val auth = Firebase.auth
+    val utilisateurActuel = auth.currentUser
+    var identifiant = ""
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTab = NavTab.entries.find { it.route == backStackEntry?.destination?.route }
@@ -50,18 +55,21 @@ fun NavGraph() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = NavTab.Alarms.route,
+            startDestination = login,
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding),
         ) {
             composable("login") {
-                LoginScreen(onSignUp = {
-                    navController.navigate("sign")
-                },
-                    onLogin = {
-                        navController.navigate(NavTab.Alarms.route)
+                if (utilisateurActuel != null) {
+                    identifiant = utilisateurActuel.uid
+                    navController.navigate("account")
+                } else {
+                    LoginScreen(onSignUp = {
+                        navController.navigate("sign")
                     })
+                }
+
             }
             composable("sign") {
                 SignScreen()
@@ -88,6 +96,9 @@ fun NavGraph() {
             composable("voteRoom"){
                 VoteRoomScreen()
             }
+        }
+        composable ( "account" ){
+            AccountScreen()
         }
     }
 }

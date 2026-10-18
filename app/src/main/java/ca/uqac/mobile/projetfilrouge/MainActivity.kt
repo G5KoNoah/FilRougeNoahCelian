@@ -6,13 +6,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmEditScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
+import ca.uqac.mobile.projetfilrouge.ui.screen.SignScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
+import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,8 +25,11 @@ class MainActivity : ComponentActivity() {
         Log.d("Create","OnCreate")
         enableEdgeToEdge()
         setContent {
-            ProjetFilRougeTheme {
-                //LoginScreen()
+            // Même instance que celle de SettingsInfo (même activité) : le thème suit le switch
+            val settingsViewModel: SettingsViewModel = viewModel()
+            val estSombre by settingsViewModel.estSombre.collectAsStateWithLifecycle()
+            ProjetFilRougeTheme(darkTheme = estSombre) {
+               //LoginScreen()
                 //SignScreen()
                 //AccountScreen()
                 //AlarmsScreen()
