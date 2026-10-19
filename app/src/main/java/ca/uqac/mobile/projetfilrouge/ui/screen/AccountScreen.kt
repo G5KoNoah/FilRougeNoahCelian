@@ -34,12 +34,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.R
+import ca.uqac.mobile.projetfilrouge.data.AccountData
+import ca.uqac.mobile.projetfilrouge.viewModel.AccountDetailsViewModel
 import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 @Composable
 fun AccountScreen(onLogout: () -> Unit) {
+    val accountViewModel: AccountDetailsViewModel = viewModel()
+    val account by accountViewModel.account.collectAsStateWithLifecycle()
+    val error by accountViewModel.error.collectAsStateWithLifecycle()
+
     Scaffold(modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier = Modifier
@@ -49,8 +55,9 @@ fun AccountScreen(onLogout: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            MainInfo()
-            OtherInfo()
+            error?.let { Text(it, color = Color.Red, fontWeight = FontWeight.Bold) }
+            MainInfo(account = account, uid = accountViewModel.uid)
+            OtherInfo(account = account)
             SettingsInfo(onLogout = onLogout)
         }
     }
@@ -67,7 +74,7 @@ fun Modifier.cardStyle(): Modifier {
 }
 
 @Composable
-fun MainInfo(modifier: Modifier = Modifier) {
+fun MainInfo(account: AccountData?, uid: String?, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.cardStyle(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -79,23 +86,23 @@ fun MainInfo(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("FirstName", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text("SurName", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(account?.firstName ?: "...", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(account?.lastName ?: "...", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(4.dp))
-        Text("UserID", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+        Text(uid ?: "", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
     }
 }
 
 @Composable
-fun OtherInfo(modifier: Modifier = Modifier) {
+fun OtherInfo(account: AccountData?, modifier: Modifier = Modifier) {
     Column(modifier = modifier.cardStyle()) {
         Text("Contact", color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             //Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.width(12.dp))
-            Text("Mail", color = MaterialTheme.colorScheme.onSurface)
+            Text(account?.email ?: "...", color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

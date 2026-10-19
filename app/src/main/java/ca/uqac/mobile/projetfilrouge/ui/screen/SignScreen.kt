@@ -19,42 +19,47 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.sp
+import ca.uqac.mobile.projetfilrouge.data.AccountData
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 
 @Composable
-fun SignScreen (){
+fun SignScreen(onLogin: () -> Unit) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
             Logo(modifier = Modifier.padding(top = 200.dp), verticalArrangement = Arrangement.Center)
-            FormSign(modifier = Modifier.padding(top = 100.dp))
+            FormSign(modifier = Modifier.padding(top = 100.dp), onLogin)
         }
     }
 }
 
 
 @Composable
-fun FormSign(modifier: Modifier = Modifier) {
-    var emailText by remember { mutableStateOf("") }
-    var passwordText by remember { mutableStateOf("") }
-    var confirmPasswordText by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf<String?>(null) }
-    var estErreur by remember { mutableStateOf(false) }
-    var enCours by remember { mutableStateOf(false) }
+fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
+    var emailText by rememberSaveable() { mutableStateOf("") }
+    var passwordText by rememberSaveable { mutableStateOf("") }
+    var confirmPasswordText by rememberSaveable { mutableStateOf("") }
+    var firstNameText by rememberSaveable() { mutableStateOf("") }
+    var lastNameText by rememberSaveable() { mutableStateOf("") }
+    var message by rememberSaveable { mutableStateOf<String?>(null) }
+    var isError by rememberSaveable { mutableStateOf(false) }
+    var isUsing by rememberSaveable { mutableStateOf(false) }
     val forme = RoundedCornerShape(16.dp)
 
     val auth = Firebase.auth
+    val db = Firebase.firestore
     Column(
         modifier = modifier
             .fillMaxWidth(0.75f)
@@ -102,6 +107,24 @@ fun FormSign(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(24.dp))
 
+        TextField(
+            value = firstNameText,
+            onValueChange = { firstNameText = it },
+            placeholder = { Text("First name") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        TextField(
+            value = lastNameText,
+            onValueChange = { lastNameText = it },
+            placeholder = { Text("Last name") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
         Button(
             onClick = {
                 // Vérifications avant d'appeler Firebase
@@ -113,27 +136,37 @@ fun FormSign(modifier: Modifier = Modifier) {
                 }
                 if (erreur != null) {
                     message = erreur
-                    estErreur = true
+                    isError = true
                     return@Button
                 }
 
-                enCours = true
+                isUsing = true
                 message = null
                 auth.createUserWithEmailAndPassword(emailText.trim(), passwordText)
-                    .addOnSuccessListener {
-                        // Compte créé avec succès
-                        enCours = false
-                        estErreur = false
-                        message = "Compte créé avec succès"
+                    .addOnSuccessListener { result ->
+                        val uid = result.user?.uid ?: return@addOnSuccessListener
+                        val account = AccountData(emailText.trim(), firstNameText.trim(), lastNameText.trim())
+                        db.collection("Account").document(uid).set(account)
+                            .addOnSuccessListener {
+                                isUsing = false
+                                isError = false
+                                message = "Compte créé avec succès"
+                                onLogin()
+                            }
+                            .addOnFailureListener { e ->
+                                isUsing = false
+                                isError = true
+                                message = e.localizedMessage ?: "Erreur Firestore"
+                            }
                     }
                     .addOnFailureListener { e ->
                         // Erreur (email déjà utilisé, mail invalide...)
-                        enCours = false
-                        estErreur = true
+                        isUsing = false
+                        isError = true
                         message = e.localizedMessage ?: "Erreur lors de la création du compte"
                     }
             },
-            enabled = !enCours,
+            enabled = !isUsing,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(
@@ -153,7 +186,7 @@ fun FormSign(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = it,
-                color = if (estErreur) Color.Red else Color.Green,
+                color = if (isError) Color.Red else Color.Green,
                 fontWeight = FontWeight.Bold
             )
         }

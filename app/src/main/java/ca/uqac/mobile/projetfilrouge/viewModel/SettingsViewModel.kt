@@ -19,13 +19,11 @@ val Context.dataStore
 class PreferencesManager(private val context: Context) {
     private val CLE_EST_SOMBRE =
         booleanPreferencesKey("est_sombre")
-    // Lire la préférence
     val estSombre: Flow<Boolean> =
         context.dataStore.data
             .map {
                     preferences -> preferences[CLE_EST_SOMBRE] ?: true
             }
-    // Écrire la préférence
     suspend fun definirThemeSombre(sombre: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[CLE_EST_SOMBRE] = sombre
@@ -34,7 +32,6 @@ class PreferencesManager(private val context: Context) {
 }
 
 
-// AndroidViewModel : la factory par défaut sait lui passer l'Application, pas besoin d'en écrire une
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesManager = PreferencesManager(application)
 

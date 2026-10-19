@@ -72,7 +72,9 @@ fun NavGraph() {
                     })
             }
             composable("sign") {
-                SignScreen()
+                SignScreen(onLogin = {
+                    navController.navigate("login")
+                })
             }
             composable("alarmEdit") {
                 AlarmEditScreen( onBackScreen = {
