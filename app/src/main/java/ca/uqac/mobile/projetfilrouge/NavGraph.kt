@@ -22,14 +22,13 @@ import ca.uqac.mobile.projetfilrouge.ui.screen.ContactsScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.SignScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import ca.uqac.mobile.projetfilrouge.data.currentUid
 
 @Composable
 fun NavGraph() {
     // Déjà connecté -> on démarre directement sur les alarmes. Calculé une seule fois.
     val startDestination = remember {
-        if (Firebase.auth.currentUser != null) NavTab.Alarms.route else "login"
+        if (currentUid != null) NavTab.Alarms.route else "login"
     }
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()

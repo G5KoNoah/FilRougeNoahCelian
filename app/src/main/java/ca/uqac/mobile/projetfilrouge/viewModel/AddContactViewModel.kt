@@ -9,24 +9,21 @@ import ca.uqac.mobile.projetfilrouge.data.Friend
 import ca.uqac.mobile.projetfilrouge.data.FriendRepository
 import ca.uqac.mobile.projetfilrouge.data.FriendStatus
 import ca.uqac.mobile.projetfilrouge.data.UserSearchResult
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.firestore
+import ca.uqac.mobile.projetfilrouge.data.currentUid
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class AddContactViewModel : ViewModel() {
 
-    private val db = Firebase.firestore
-    private val me: String? = Firebase.auth.currentUser?.uid
+    private val me: String? = currentUid
 
     var query by mutableStateOf("")
         private set
@@ -58,33 +55,27 @@ class AddContactViewModel : ViewModel() {
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val listeners = mutableListOf<ListenerRegistration>()
     private var searchJob: Job? = null
 
     init {
         if (me == null) {
             error = "No user signed in"
         } else {
-            listeners += db.collection("friendships")
-                .whereArrayContains("members", me)
-                .addSnapshotListener { snapshot, e ->
-                    if (e != null) return@addSnapshotListener showError(e)
-                    friendUids.value = snapshot?.documents.orEmpty().mapNotNull { doc ->
-                        (doc.get("members") as? List<*>)?.filterIsInstance<String>()?.firstOrNull { it != me }
-                    }.toSet()
-                }
-            listeners += db.collection("friendRequests")
-                .whereEqualTo("from", me)
-                .addSnapshotListener { snapshot, e ->
-                    if (e != null) return@addSnapshotListener showError(e)
-                    sentTo.value = snapshot?.documents.orEmpty().mapNotNull { it.getString("to") }.toSet()
-                }
-            listeners += db.collection("friendRequests")
-                .whereEqualTo("to", me)
-                .addSnapshotListener { snapshot, e ->
-                    if (e != null) return@addSnapshotListener showError(e)
-                    receivedFrom.value = snapshot?.documents.orEmpty().mapNotNull { it.getString("from") }.toSet()
-                }
+            viewModelScope.launch {
+                FriendRepository.observeFriendUids(me)
+                    .catch { e -> showError(e) }
+                    .collect { friendUids.value = it.toSet() }
+            }
+            viewModelScope.launch {
+                FriendRepository.observeSentRequestUids(me)
+                    .catch { e -> showError(e) }
+                    .collect { sentTo.value = it.toSet() }
+            }
+            viewModelScope.launch {
+                FriendRepository.observeReceivedRequests(me)
+                    .catch { e -> showError(e) }
+                    .collect { requests -> receivedFrom.value = requests.map { it.fromUid }.toSet() }
+            }
         }
     }
 
@@ -135,12 +126,7 @@ class AddContactViewModel : ViewModel() {
         }
     }
 
-    private fun showError(e: Exception) {
-        error = e.localizedMessage ?: "Firestore error"
-    }
-
-    override fun onCleared() {
-        listeners.forEach { it.remove() }
-        super.onCleared()
+    private fun showError(e: Throwable) {
+        error = e.localizedMessage ?: "Supabase error"
     }
 }

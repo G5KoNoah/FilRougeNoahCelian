@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -26,6 +27,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,12 +37,16 @@ import ca.uqac.mobile.projetfilrouge.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import ca.uqac.mobile.projetfilrouge.data.supabase
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen (onSignUp:()-> Unit, onLogin: () -> Unit){
@@ -81,7 +87,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
     val forme = RoundedCornerShape(16.dp)
     var message by remember { mutableStateOf<String?>(null) }
     var estErreur by remember { mutableStateOf(false) }
-    val auth = Firebase.auth
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = modifier
@@ -102,7 +108,8 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
             onValueChange = { emailText = it },
             placeholder = { Text("Login") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -117,23 +124,27 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
         Spacer(modifier = Modifier.height(24.dp))
         Button(
             onClick = {
-                // Firebase plante si un champ est vide : on vérifie avant
+                // Supabase refuse la requête si un champ est vide : on vérifie avant
                 if (emailText.isBlank() || passwordText.isEmpty()) {
                     estErreur = true
-                    message = "Remplis le mail et le mot de passe"
+                    message = "Error mail or password"
                     return@Button
                 }
                 message = null
-                auth.signInWithEmailAndPassword(emailText.trim(), passwordText)
-                    .addOnSuccessListener {
+                scope.launch {
+                    try {
+                        supabase.auth.signInWith(Email) {
+                            email = emailText.trim()
+                            password = passwordText
+                        }
                         estErreur = false
-                        message = "Connexion compte reussi"
+                        message = "Login success"
                         onLogin()
-                    }
-                    .addOnFailureListener { e ->
+                    } catch (e: Exception) {
                         estErreur = true
-                        message = e.localizedMessage ?: "Erreur connexion"
+                        message = e.localizedMessage ?: "Error login"
                     }
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
@@ -161,7 +172,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "or sign in",
+            text = stringResource(R.string.or_sign_in),
             color = Color.White,
             fontSize = 14.sp,
             textDecoration = TextDecoration.Underline,

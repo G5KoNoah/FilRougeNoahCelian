@@ -24,6 +24,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,8 +38,9 @@ import ca.uqac.mobile.projetfilrouge.R
 import ca.uqac.mobile.projetfilrouge.data.AccountData
 import ca.uqac.mobile.projetfilrouge.viewModel.AccountDetailsViewModel
 import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import ca.uqac.mobile.projetfilrouge.data.supabase
+import io.github.jan.supabase.auth.auth
+import kotlinx.coroutines.launch
 
 @Composable
 fun AccountScreen(onLogout: () -> Unit) {
@@ -109,7 +111,7 @@ fun OtherInfo(account: AccountData?, modifier: Modifier = Modifier) {
 
 @Composable
 fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
-    val auth = Firebase.auth
+    val scope = rememberCoroutineScope()
     val viewModel: SettingsViewModel = viewModel()
     val estSombre by viewModel.estSombre.collectAsStateWithLifecycle()
     Column(modifier = modifier.cardStyle()) {
@@ -133,8 +135,13 @@ fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = { auth.signOut()
-                      onLogout()},
+            onClick = {
+                scope.launch {
+                    // Déconnexion locale même si le serveur ne répond pas
+                    runCatching { supabase.auth.signOut() }
+                    onLogout()
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(

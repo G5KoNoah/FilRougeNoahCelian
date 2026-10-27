@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+import ca.uqac.mobile.projetfilrouge.data.uidChanges
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,8 +13,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class SharedAlarmsViewModel : ViewModel() {
-
-    private val auth = Firebase.auth
 
     private val _uid = MutableStateFlow<String?>(null)
     val uid: StateFlow<String?> = _uid.asStateFlow()
@@ -29,10 +25,8 @@ class SharedAlarmsViewModel : ViewModel() {
 
     private var observeJob: Job? = null
 
-    private val authListener = FirebaseAuth.AuthStateListener { onUserChanged(it.currentUser?.uid) }
-
     init {
-        auth.addAuthStateListener(authListener)
+        viewModelScope.launch { uidChanges.collect { onUserChanged(it) } }
     }
 
     private fun onUserChanged(newUid: String?) {
@@ -49,7 +43,7 @@ class SharedAlarmsViewModel : ViewModel() {
         }
         observeJob = viewModelScope.launch {
             AlarmRepository.observeAlarmsOf(newUid)
-                .catch { e -> _error.value = e.localizedMessage ?: "Firestore error" }
+                .catch { e -> _error.value = e.localizedMessage ?: "Supabase error" }
                 .collect { _alarms.value = it }
         }
     }
@@ -86,10 +80,5 @@ class SharedAlarmsViewModel : ViewModel() {
                 _error.value = e.localizedMessage ?: errorMessage
             }
         }
-    }
-
-    override fun onCleared() {
-        auth.removeAuthStateListener(authListener)
-        super.onCleared()
     }
 }

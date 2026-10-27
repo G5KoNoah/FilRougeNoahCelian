@@ -23,6 +23,4 @@ data class UserSearchResult(
     val status: FriendStatus,
 )
 
-fun friendshipId(uidA: String, uidB: String): String = listOf(uidA, uidB).sorted().joinToString("_")
-
 fun friendRequestId(fromUid: String, toUid: String): String = "${fromUid}_$toUid"

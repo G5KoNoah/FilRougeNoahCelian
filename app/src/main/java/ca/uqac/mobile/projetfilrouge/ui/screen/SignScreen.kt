@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,10 +37,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.sp
-import ca.uqac.mobile.projetfilrouge.data.AccountData
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.firestore.firestore
+import ca.uqac.mobile.projetfilrouge.data.supabase
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 @Composable
 fun SignScreen(onLogin: () -> Unit) {
@@ -74,8 +77,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
     var isUsing by rememberSaveable { mutableStateOf(false) }
     val forme = RoundedCornerShape(16.dp)
 
-    val auth = Firebase.auth
-    val db = Firebase.firestore
+    val scope = rememberCoroutineScope()
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -143,7 +145,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
 
         Button(
             onClick = {
-                // Vérifications avant d'appeler Firebase
+                // Vérifications avant d'appeler Supabase
                 val erreur = when {
                     emailText.isBlank() -> "Entre ton adresse mail"
                     passwordText.length < 6 -> "Le mot de passe doit faire au moins 6 caractères"
@@ -158,29 +160,28 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
 
                 isUsing = true
                 message = null
-                auth.createUserWithEmailAndPassword(emailText.trim(), passwordText)
-                    .addOnSuccessListener { result ->
-                        val uid = result.user?.uid ?: return@addOnSuccessListener
-                        val account = AccountData(emailText.trim(), firstNameText.trim(), lastNameText.trim())
-                        db.collection("Account").document(uid).set(account)
-                            .addOnSuccessListener {
-                                isUsing = false
-                                isError = false
-                                message = "Compte créé avec succès"
-                                onLogin()
+                scope.launch {
+                    try {
+                        // La ligne "accounts" est créée par un trigger SQL à partir de ces métadonnées
+                        supabase.auth.signUpWith(Email) {
+                            email = emailText.trim()
+                            password = passwordText
+                            data = buildJsonObject {
+                                put("first_name", firstNameText.trim())
+                                put("last_name", lastNameText.trim())
                             }
-                            .addOnFailureListener { e ->
-                                isUsing = false
-                                isError = true
-                                message = e.localizedMessage ?: "Erreur Firestore"
-                            }
-                    }
-                    .addOnFailureListener { e ->
+                        }
+                        isError = false
+                        message = "Compte créé avec succès"
+                        onLogin()
+                    } catch (e: Exception) {
                         // Erreur (email déjà utilisé, mail invalide...)
-                        isUsing = false
                         isError = true
                         message = e.localizedMessage ?: "Erreur lors de la création du compte"
+                    } finally {
+                        isUsing = false
                     }
+                }
             },
             enabled = !isUsing,
             modifier = Modifier.fillMaxWidth(),

@@ -2,27 +2,21 @@ package ca.uqac.mobile.projetfilrouge.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ca.uqac.mobile.projetfilrouge.data.AccountData
 import ca.uqac.mobile.projetfilrouge.data.Friend
 import ca.uqac.mobile.projetfilrouge.data.FriendRequest
 import ca.uqac.mobile.projetfilrouge.data.FriendRepository
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
-import com.google.firebase.firestore.FieldPath
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.Job
+import ca.uqac.mobile.projetfilrouge.data.uidChanges
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class FriendsViewModel : ViewModel() {
 
-    private val db = Firebase.firestore
-    private val auth = Firebase.auth
     private var uid: String? = null
 
     private val _friends = MutableStateFlow<List<Friend>>(emptyList())
@@ -34,24 +28,14 @@ class FriendsViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    private var friendsListener: ListenerRegistration? = null
-    private var requestsListener: ListenerRegistration? = null
-    private var loadFriendsJob: Job? = null
-
-    private val authListener = FirebaseAuth.AuthStateListener { onUserChanged(it.currentUser?.uid) }
-
     init {
-        auth.addAuthStateListener(authListener)
+        // collectLatest annule les écoutes de l'ancien utilisateur à chaque connexion / déconnexion
+        viewModelScope.launch {
+            uidChanges.collectLatest { onUserChanged(it) }
+        }
     }
 
-    private fun onUserChanged(newUid: String?) {
-        if (newUid == uid && newUid != null) return
-
-        friendsListener?.remove()
-        requestsListener?.remove()
-        loadFriendsJob?.cancel()
-        friendsListener = null
-        requestsListener = null
+    private suspend fun onUserChanged(newUid: String?) {
         uid = newUid
         _friends.value = emptyList()
         _requests.value = emptyList()
@@ -59,60 +43,26 @@ class FriendsViewModel : ViewModel() {
 
         if (newUid == null) {
             _error.value = "No user signed in"
-        } else {
-            friendsListener = db.collection("friendships")
-                .whereArrayContains("members", newUid)
-                .addSnapshotListener { snapshot, e ->
-                    if (e != null) {
-                        _error.value = e.localizedMessage ?: "Firestore error"
-                        return@addSnapshotListener
-                    }
-                    val friendUids = snapshot?.documents.orEmpty().mapNotNull { doc ->
-                        (doc.get("members") as? List<*>)
-                            ?.filterIsInstance<String>()
-                            ?.firstOrNull { it != newUid }
-                    }
-                    loadFriends(friendUids)
-                }
-
-            requestsListener = db.collection("friendRequests")
-                .whereEqualTo("to", newUid)
-                .addSnapshotListener { snapshot, e ->
-                    if (e != null) {
-                        _error.value = e.localizedMessage ?: "Firestore error"
-                        return@addSnapshotListener
-                    }
-                    _requests.value = snapshot?.documents.orEmpty().map { doc ->
-                        FriendRequest(
-                            id = doc.id,
-                            fromUid = doc.getString("from").orEmpty(),
-                            fromName = doc.getString("fromName").orEmpty(),
-                            fromEmail = doc.getString("fromEmail").orEmpty(),
-                        )
-                    }
-                }
+            return
         }
-    }
-
-    private fun loadFriends(friendUids: List<String>) {
-        loadFriendsJob?.cancel()
-        loadFriendsJob = viewModelScope.launch {
-            try {
-                _friends.value = friendUids.chunked(30)
-                    .flatMap { chunk ->
-                        db.collection("Account")
-                            .whereIn(FieldPath.documentId(), chunk)
-                            .get()
-                            .await()
-                            .documents
+        coroutineScope {
+            launch {
+                FriendRepository.observeFriendUids(newUid)
+                    .catch { e -> _error.value = e.localizedMessage ?: "Supabase error" }
+                    .collectLatest { friendUids ->
+                        try {
+                            _friends.value = FriendRepository.getFriends(friendUids)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            _error.value = e.localizedMessage ?: "Supabase error"
+                        }
                     }
-                    .map { doc ->
-                        val account = doc.toObject(AccountData::class.java) ?: AccountData()
-                        Friend(doc.id, account.email, account.firstName, account.lastName)
-                    }
-                    .sortedBy { it.displayName.lowercase() }
-            } catch (e: Exception) {
-                _error.value = e.localizedMessage ?: "Firestore error"
+            }
+            launch {
+                FriendRepository.observeReceivedRequests(newUid)
+                    .catch { e -> _error.value = e.localizedMessage ?: "Supabase error" }
+                    .collect { _requests.value = it }
             }
         }
     }
@@ -148,12 +98,5 @@ class FriendsViewModel : ViewModel() {
                 _error.value = e.localizedMessage ?: "Couldn't remove this contact"
             }
         }
-    }
-
-    override fun onCleared() {
-        auth.removeAuthStateListener(authListener)
-        friendsListener?.remove()
-        requestsListener?.remove()
-        super.onCleared()
     }
 }
