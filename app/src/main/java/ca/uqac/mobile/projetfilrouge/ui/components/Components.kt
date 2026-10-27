@@ -120,14 +120,14 @@ fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun BackHeader(title: String) {
+fun BackHeader(title: String, onBack: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp)
     ) {
-        IconButton(onClick = {}, modifier = Modifier.align(Alignment.CenterStart)) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+        IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
         ScreenTitle(title, Modifier.align(Alignment.Center))
     }
@@ -153,11 +153,13 @@ fun PrimaryButton(
     text: String,
     modifier: Modifier = Modifier,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
+    enabled: Boolean = true,
     onClick: ()-> Unit = {}
 ) {
     Button(
         onClick = {onClick()},
         modifier = modifier,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(contentColor = contentColor),
     ) {
         Text(text, fontWeight = FontWeight.Bold)

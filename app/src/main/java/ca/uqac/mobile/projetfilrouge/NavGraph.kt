@@ -87,7 +87,9 @@ fun NavGraph() {
             })
             }
             composable(NavTab.Contacts.route) {
-                ContactsScreen()
+                ContactsScreen(onAddContact = {
+                    navController.navigate("addContact")
+                })
             }
             composable(NavTab.Profile.route) {
                 AccountScreen(onLogout = {
@@ -97,7 +99,9 @@ fun NavGraph() {
                 })
             }
             composable("addContact"){
-                AddContactScreen()
+                AddContactScreen(onBack = {
+                    navController.popBackStack()
+                })
             }
             composable("voteRoom"){
                 VoteRoomScreen()
