@@ -1,5 +1,6 @@
 package ca.uqac.mobile.projetfilrouge
 
+import android.app.AlarmManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -29,12 +30,6 @@ class MainActivity : ComponentActivity() {
             val settingsViewModel: SettingsViewModel = viewModel()
             val estSombre by settingsViewModel.estSombre.collectAsStateWithLifecycle()
             ProjetFilRougeTheme(darkTheme = estSombre) {
-               //LoginScreen()
-                //SignScreen()
-                //AccountScreen()
-                //AlarmsScreen()
-                //AlarmEditScreen()
-                //VoteRoomScreen()
                 NavGraph()
             }
         }

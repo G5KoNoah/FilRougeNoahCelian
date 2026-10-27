@@ -47,9 +47,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ca.uqac.mobile.projetfilrouge.AppVibrator
 
 val CardShape = RoundedCornerShape(12.dp)
 private val PillShape = RoundedCornerShape(8.dp)
@@ -156,8 +158,12 @@ fun PrimaryButton(
     enabled: Boolean = true,
     onClick: ()-> Unit = {}
 ) {
+    val context = LocalContext.current
+    val vibrator = remember { AppVibrator(context) }
     Button(
-        onClick = {onClick()},
+        onClick = {
+            vibrator.click()
+            onClick()},
         modifier = modifier,
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(contentColor = contentColor),

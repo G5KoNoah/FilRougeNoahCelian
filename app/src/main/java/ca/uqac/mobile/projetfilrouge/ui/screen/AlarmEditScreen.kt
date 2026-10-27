@@ -38,6 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ca.uqac.mobile.projetfilrouge.AppVibrator
+import ca.uqac.mobile.projetfilrouge.data.AlarmData
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatars
 import ca.uqac.mobile.projetfilrouge.ui.components.PillDropdown
@@ -48,12 +50,14 @@ import ca.uqac.mobile.projetfilrouge.ui.components.SecondaryButton
 import ca.uqac.mobile.projetfilrouge.ui.components.SwitchRow
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 import ca.uqac.mobile.projetfilrouge.viewModel.AlarmEditViewModel
-
+import ca.uqac.mobile.projetfilrouge.viewModel.AlarmViewModel
+import java.util.Calendar
 
 
 @Composable
 fun AlarmEditScreen(onBackScreen: ()-> Unit) {
     val viewModel : AlarmEditViewModel = viewModel()
+    val alarmViewModel: AlarmViewModel = viewModel()
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -100,8 +104,27 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         ) {
-            SecondaryButton("Cancel", onClick = onBackScreen)
-            PrimaryButton("Save")
+            SecondaryButton("Cancel", onClick = {
+                //onBackScreen
+                val maintenant = Calendar.getInstance();
+                alarmViewModel.deleteAlarm(                    AlarmData(
+                    id = 1,
+                    name = viewModel.name,
+                    hour = maintenant.get(Calendar.HOUR_OF_DAY),
+                    minute = maintenant.get(Calendar.MINUTE) + 1,
+                ))
+            })
+            PrimaryButton("Save", onClick = {
+                val maintenant = Calendar.getInstance();
+                alarmViewModel.addAlarm(
+                    AlarmData(
+                        id = 1,
+                        name = viewModel.name,
+                        hour = maintenant.get(Calendar.HOUR_OF_DAY),
+                        minute = maintenant.get(Calendar.MINUTE) + 1,
+                    )
+                )
+            })
         }
     }
 }

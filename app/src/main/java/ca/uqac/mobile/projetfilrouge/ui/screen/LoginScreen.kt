@@ -82,6 +82,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
     var message by remember { mutableStateOf<String?>(null) }
     var estErreur by remember { mutableStateOf(false) }
     val auth = Firebase.auth
+
     Column(
         modifier = modifier
             .fillMaxWidth()

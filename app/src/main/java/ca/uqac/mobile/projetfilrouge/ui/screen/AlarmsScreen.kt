@@ -1,5 +1,9 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +35,13 @@ import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 
 @Composable
 fun AlarmsScreen(onAlarmEdit: ()-> Unit) {
+    // Android 13+ : sans cette permission, la notification de l'alarme ne s'affiche pas.
+    // Demandée une seule fois, à l'ouverture de l'écran.
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= 33) launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
         ScreenTitle("Alarm in 10 hours\nand 32 minutes", Modifier.fillMaxWidth())
