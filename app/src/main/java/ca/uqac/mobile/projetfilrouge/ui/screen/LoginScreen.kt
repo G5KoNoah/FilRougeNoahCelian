@@ -6,11 +6,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -39,9 +45,19 @@ import com.google.firebase.auth.auth
 @Composable
 fun LoginScreen (onSignUp:()-> Unit, onLogin: () -> Unit){
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
-            Logo(modifier = Modifier.padding(top = 200.dp), verticalArrangement = Arrangement.Center)
-            FormLogin(modifier = Modifier.padding(top = 100.dp), onSignUp, onLogin)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(32.dp),
+        ) {
+            Logo(modifier = Modifier.heightIn(max = 160.dp), verticalArrangement = Arrangement.Center)
+            FormLogin(modifier = Modifier.widthIn(max = 480.dp), onSignUp, onLogin)
         }
     }
 }
@@ -68,7 +84,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
     val auth = Firebase.auth
     Column(
         modifier = modifier
-            .fillMaxWidth(0.75f)
+            .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.surface, shape = forme)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
