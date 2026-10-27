@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ca.uqac.mobile.projetfilrouge.AppVibrator
 import ca.uqac.mobile.projetfilrouge.data.AlarmData
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatars
