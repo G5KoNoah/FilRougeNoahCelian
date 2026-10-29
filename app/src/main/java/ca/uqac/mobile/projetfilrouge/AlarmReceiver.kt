@@ -11,11 +11,17 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
+import kotlinx.serialization.json.Json
 
 // Appelé par le système quand une alarme planifiée par AlarmScheduler arrive à échéance
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        intent.getStringExtra(AlarmScheduler.EXTRA_ALARM)?.let {
+            AlarmScheduler(context).schedule(Json.decodeFromString(SharedAlarm.serializer(), it))
+        }
+
         val notificationManager = context.getSystemService(NotificationManager::class.java)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
