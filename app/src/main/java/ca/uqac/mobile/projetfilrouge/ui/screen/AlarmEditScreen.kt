@@ -52,6 +52,13 @@ import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 import ca.uqac.mobile.projetfilrouge.viewModel.AlarmEditViewModel
 import ca.uqac.mobile.projetfilrouge.viewModel.AlarmViewModel
 import java.util.Calendar
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.filter
 
 
 @Composable
@@ -60,11 +67,21 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
     val alarmViewModel: AlarmViewModel = viewModel()
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             AppCard {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TimeSelector()
-                    DaysRow()
+                    TimeSelector(
+                        hour = viewModel.hour,
+                        minute = viewModel.minute,
+                        onHourChange = viewModel::onHourChange,
+                        onMinuteChange = viewModel::onMinuteChange,
+                    )
+                    DaysRow(selected = viewModel.days, onToggle = viewModel::toggleDay)
                     PillTextField(value = viewModel.name, onValueChange = { viewModel.onNameChange(it) }, placeholder = "Alarm name")
                     PillDropdown(viewModel.ringtone ?: "Ringtone", viewModel.ringtones, onSelect = { viewModel.onRingtoneSelected(it) })
                     PillDropdown(viewModel.snooze, viewModel.snoozeOptions, onSelect = { viewModel.onSnoozeSelected(it) })
@@ -83,17 +100,17 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
                 }
             }
 
-            SwitchRow("Sound", checked = false)
-            SwitchRow("Vibrations", checked = false)
+            SwitchRow("Sound", checked = viewModel.sound, onCheckedChange = viewModel::onSoundChange)
+            SwitchRow("Vibrations", checked = viewModel.vibrations, onCheckedChange = viewModel::onVibrationsChange)
 
             AppCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text("Members", style = MaterialTheme.typography.labelMedium)
-                        MemberAvatars(5)
+                        MemberAvatars(viewModel.members.size.coerceAtMost(6))
                     }
                     IconButton(onClick = {}) {
-                        Icon(Icons.Outlined.PersonAddAlt, contentDescription = "Ajouter un membre")
+                        Icon(Icons.Outlined.PersonAddAlt, contentDescription = "Add a member")
                     }
                 }
             }
@@ -130,15 +147,20 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
 }
 
 @Composable
-private fun TimeSelector() {
+private fun TimeSelector(
+    hour: Int,
+    minute: Int,
+    onHourChange: (Int) -> Unit,
+    onMinuteChange: (Int) -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        NumberWheel(count = 24, initial = 6)
+        NumberWheel(count = 24, initial = hour, onValueChange = onHourChange)
         Text(":", fontSize = 32.sp, modifier = Modifier.padding(horizontal = 8.dp))
-        NumberWheel(count = 60, initial = 0)
+        NumberWheel(count = 60, initial = minute, onValueChange = onMinuteChange)
     }
 }
 
@@ -146,7 +168,7 @@ private val WheelItemHeight = 44.dp
 private const val WheelLoops = 1000
 
 @Composable
-private fun NumberWheel(count: Int, initial: Int) {
+private fun NumberWheel(count: Int, initial: Int, onValueChange: (Int) -> Unit) {
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = count * WheelLoops / 2 + initial - 1
     )
@@ -156,6 +178,13 @@ private fun NumberWheel(count: Int, initial: Int) {
             val pastHalf = listState.firstVisibleItemScrollOffset > itemHeightPx / 2
             listState.firstVisibleItemIndex + if (pastHalf) 2 else 1
         }
+    }
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .filter { !it }
+            .collect { currentOnValueChange(centerIndex % count) }
     }
 
     LazyColumn(
@@ -181,9 +210,8 @@ private fun NumberWheel(count: Int, initial: Int) {
 }
 
 @Composable
-private fun DaysRow() {
+private fun DaysRow(selected: Set<Int>, onToggle: (Int) -> Unit) {
     val days = listOf("S", "M", "T", "W", "T", "F", "S")
-    val selected = setOf(2, 4)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -198,12 +226,18 @@ private fun DaysRow() {
                     .size(28.dp)
                     .clip(CircleShape)
                     .background(
-                        if (index in selected) MaterialTheme.colorScheme.surfaceVariant
+                        if (index in selected) MaterialTheme.colorScheme.primary
                         else Color.Transparent
-                    ),
+                    )
+                    .clickable { onToggle(index) },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(letter, style = MaterialTheme.typography.labelMedium)
+                Text(
+                    letter,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (index in selected) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
     }
