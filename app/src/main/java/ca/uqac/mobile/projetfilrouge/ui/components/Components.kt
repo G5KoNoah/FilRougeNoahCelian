@@ -192,21 +192,26 @@ fun SecondaryButton(
 }
 
 @Composable
-fun SmallSwitch(checked: Boolean) {
+fun SmallSwitch(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)? = null) {
     Switch(
         checked = checked,
-        onCheckedChange = null,
+        onCheckedChange = onCheckedChange,
         modifier = Modifier.scale(0.7f),
         colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary),
     )
 }
 
 @Composable
-fun SwitchRow(label: String, checked: Boolean, modifier: Modifier = Modifier) {
+fun SwitchRow(
+    label: String,
+    checked: Boolean,
+    modifier: Modifier = Modifier,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+) {
     AppCard(modifier, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-            SmallSwitch(checked)
+            SmallSwitch(checked, onCheckedChange)
         }
     }
 }
