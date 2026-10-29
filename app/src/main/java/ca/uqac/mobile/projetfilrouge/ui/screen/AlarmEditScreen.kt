@@ -34,12 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.AppVibrator
-import ca.uqac.mobile.projetfilrouge.data.AlarmData
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatars
 import ca.uqac.mobile.projetfilrouge.ui.components.PillDropdown
@@ -48,13 +46,14 @@ import ca.uqac.mobile.projetfilrouge.ui.components.PrimaryButton
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenLayout
 import ca.uqac.mobile.projetfilrouge.ui.components.SecondaryButton
 import ca.uqac.mobile.projetfilrouge.ui.components.SwitchRow
-import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 import ca.uqac.mobile.projetfilrouge.viewModel.AlarmEditViewModel
-import ca.uqac.mobile.projetfilrouge.viewModel.AlarmViewModel
-import java.util.Calendar
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
@@ -64,9 +63,16 @@ import kotlinx.coroutines.flow.filter
 @Composable
 fun AlarmEditScreen(onBackScreen: ()-> Unit) {
     val viewModel : AlarmEditViewModel = viewModel()
-    val alarmViewModel: AlarmViewModel = viewModel()
+    var confirmRemove by remember { mutableStateOf(false) }
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
+        if (viewModel.isLoading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            return@ScreenLayout
+        }
+        viewModel.error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -121,28 +127,37 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         ) {
-            SecondaryButton("Cancel", onClick = {
-                //onBackScreen
-                val maintenant = Calendar.getInstance();
-                alarmViewModel.deleteAlarm(                    AlarmData(
-                    id = 1,
-                    name = viewModel.name,
-                    hour = maintenant.get(Calendar.HOUR_OF_DAY),
-                    minute = maintenant.get(Calendar.MINUTE) + 1,
-                ))
-            })
-            PrimaryButton("Save", onClick = {
-                val maintenant = Calendar.getInstance();
-                alarmViewModel.addAlarm(
-                    AlarmData(
-                        id = 1,
-                        name = viewModel.name,
-                        hour = maintenant.get(Calendar.HOUR_OF_DAY),
-                        minute = maintenant.get(Calendar.MINUTE) + 1,
-                    )
+            SecondaryButton("Cancel", onClick = onBackScreen)
+            if (!viewModel.isNew) {
+                SecondaryButton(
+                    if (viewModel.isOwner) "Delete" else "Leave",
+                    contentColor = MaterialTheme.colorScheme.error,
+                    onClick = { confirmRemove = true },
                 )
-            })
+            }
+            PrimaryButton("Save", enabled = !viewModel.isSaving, onClick = { viewModel.save(onDone = onBackScreen) })
         }
+        Spacer(Modifier.height(16.dp))
+    }
+
+    if (confirmRemove) {
+        AlertDialog(
+            onDismissRequest = { confirmRemove = false },
+            title = { Text(if (viewModel.isOwner) "Delete this alarm?" else "Leave this alarm?") },
+            text = {
+                Text(
+                    if (viewModel.isOwner) "The alarm will be deleted for every member."
+                    else "You won't receive this alarm anymore."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmRemove = false
+                    viewModel.deleteOrLeave(onDone = onBackScreen)
+                }) { Text(if (viewModel.isOwner) "Delete" else "Leave") }
+            },
+            dismissButton = { TextButton(onClick = { confirmRemove = false }) { Text("Cancel") } },
+        )
     }
 }
 
@@ -241,10 +256,4 @@ private fun DaysRow(selected: Set<Int>, onToggle: (Int) -> Unit) {
             }
         }
     }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-private fun AlarmEditScreenPreview() {
-    ProjetFilRougeTheme { AlarmEditScreen({}) }
 }

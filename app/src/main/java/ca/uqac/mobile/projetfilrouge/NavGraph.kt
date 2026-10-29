@@ -8,10 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import ca.uqac.mobile.projetfilrouge.ui.components.BottomNavBar
 import ca.uqac.mobile.projetfilrouge.ui.components.NavTab
 import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
@@ -75,7 +77,14 @@ fun NavGraph() {
                     navController.navigate("login")
                 })
             }
-            composable("alarmEdit") {
+            composable(
+                "alarmEdit?alarmId={alarmId}",
+                arguments = listOf(navArgument("alarmId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }),
+            ) {
                 AlarmEditScreen( onBackScreen = {
                     navController.popBackStack()
                 })
