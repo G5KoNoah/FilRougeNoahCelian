@@ -5,7 +5,8 @@ import android.content.Context
 import android.content.Intent
 
 class BootReceiver : BroadcastReceiver(){
-    override fun onReceive(context: Context?, intent: Intent?) {
-        TODO("Not yet implemented")
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        AlarmSync(context).rescheduleSaved()
     }
 }

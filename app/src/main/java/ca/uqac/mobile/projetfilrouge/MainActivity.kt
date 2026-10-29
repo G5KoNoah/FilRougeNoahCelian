@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmEditScreen
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.d("Create","OnCreate")
         enableEdgeToEdge()
+        AlarmSync(applicationContext).start(lifecycleScope)
         setContent {
             // Même instance que celle de SettingsInfo (même activité) : le thème suit le switch
             val settingsViewModel: SettingsViewModel = viewModel()
