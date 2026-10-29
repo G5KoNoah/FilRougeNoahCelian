@@ -41,4 +41,24 @@ class AlarmScheduler (private val context: Context){
     }
 
     fun cancel(alarm: AlarmData) = alarmManager.cancel(pendingIntent(alarm))
+
+    companion object {
+        fun nextOccurrence(hour: Int, minute: Int, days: List<Int>, fromMillis: Long = System.currentTimeMillis()): Long {
+            for (offset in 0..7) {
+                val candidate = Calendar.getInstance().apply {
+                    timeInMillis = fromMillis
+                    add(Calendar.DAY_OF_YEAR, offset)
+                    set(Calendar.HOUR_OF_DAY, hour)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val dayIndex = candidate.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+                if (candidate.timeInMillis > fromMillis && (days.isEmpty() || dayIndex in days)) {
+                    return candidate.timeInMillis
+                }
+            }
+            return fromMillis + 24 * 60 * 60 * 1000L
+        }
+    }
 }

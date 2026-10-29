@@ -90,8 +90,8 @@ fun NavGraph() {
                 })
             }
             composable(NavTab.Alarms.route) {
-                AlarmsScreen( onAlarmEdit = {
-                    navController.navigate("alarmEdit")
+                AlarmsScreen( onAlarmEdit = { alarmId ->
+                    navController.navigate(if (alarmId == null) "alarmEdit" else "alarmEdit?alarmId=$alarmId")
             })
             }
             composable(NavTab.Contacts.route) {
