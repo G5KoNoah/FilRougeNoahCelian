@@ -1,6 +1,9 @@
 package ca.uqac.mobile.projetfilrouge.viewModel
 
-import androidx.lifecycle.ViewModel
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.annotation.StringRes
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.data.AccountData
 import ca.uqac.mobile.projetfilrouge.data.currentUid
@@ -13,7 +16,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class AccountDetailsViewModel : ViewModel() {
+class AccountDetailsViewModel(application: Application) : AndroidViewModel(application) {
+
+    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     val uid: String? = currentUid
 
@@ -25,7 +31,7 @@ class AccountDetailsViewModel : ViewModel() {
 
     init {
         if (uid == null) {
-            _error.value = "Aucun utilisateur connecté"
+            _error.value = str(R.string.error_no_user)
         } else {
             // L'écoute s'arrête toute seule quand le ViewModel est détruit (viewModelScope)
             viewModelScope.launch {
@@ -33,10 +39,10 @@ class AccountDetailsViewModel : ViewModel() {
                     supabase.from("accounts").select { filter { eq("id", uid) } }
                         .decodeSingleOrNull<AccountData>()
                 }
-                    .catch { e -> _error.value = e.localizedMessage ?: "Erreur Supabase" }
+                    .catch { e -> _error.value = e.localizedMessage ?: str(R.string.error_server) }
                     .collect { account ->
                         if (account == null) {
-                            _error.value = "Profil introuvable"
+                            _error.value = str(R.string.account_not_found)
                         } else {
                             _error.value = null
                             _account.value = account

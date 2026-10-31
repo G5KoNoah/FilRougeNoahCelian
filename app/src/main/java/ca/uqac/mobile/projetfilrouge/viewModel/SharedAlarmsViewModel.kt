@@ -1,6 +1,9 @@
 package ca.uqac.mobile.projetfilrouge.viewModel
 
-import androidx.lifecycle.ViewModel
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.annotation.StringRes
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
@@ -12,7 +15,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class SharedAlarmsViewModel : ViewModel() {
+class SharedAlarmsViewModel(application: Application) : AndroidViewModel(application) {
+
+    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     private val _uid = MutableStateFlow<String?>(null)
     val uid: StateFlow<String?> = _uid.asStateFlow()
@@ -38,35 +44,35 @@ class SharedAlarmsViewModel : ViewModel() {
         _error.value = null
 
         if (newUid == null) {
-            _error.value = "No user signed in"
+            _error.value = str(R.string.error_no_user)
             return
         }
         observeJob = viewModelScope.launch {
             AlarmRepository.observeAlarmsOf(newUid)
-                .catch { e -> _error.value = e.localizedMessage ?: "Supabase error" }
+                .catch { e -> _error.value = e.localizedMessage ?: str(R.string.error_server) }
                 .collect { _alarms.value = it }
         }
     }
 
     fun createAlarm(alarm: SharedAlarm, onCreated: (String) -> Unit = {}) {
         val me = _uid.value ?: return
-        launchAction("Couldn't create the alarm") { onCreated(AlarmRepository.createAlarm(me, alarm)) }
+        launchAction(str(R.string.alarm_error_create)) { onCreated(AlarmRepository.createAlarm(me, alarm)) }
     }
 
     fun updateSettings(alarm: SharedAlarm) =
-        launchAction("Couldn't update the alarm") { AlarmRepository.updateSettings(alarm) }
+        launchAction(str(R.string.alarm_error_update)) { AlarmRepository.updateSettings(alarm) }
 
     fun setEnabled(alarm: SharedAlarm, enabled: Boolean) {
         val me = _uid.value ?: return
-        launchAction("Couldn't change the alarm") { AlarmRepository.setEnabled(alarm.id, me, enabled) }
+        launchAction(str(R.string.alarm_error_change)) { AlarmRepository.setEnabled(alarm.id, me, enabled) }
     }
 
     fun addMember(alarm: SharedAlarm, friendUid: String) =
-        launchAction("Couldn't add this member") { AlarmRepository.addMember(alarm.id, friendUid) }
+        launchAction(str(R.string.alarm_error_add_member)) { AlarmRepository.addMember(alarm.id, friendUid) }
 
     fun leaveOrDelete(alarm: SharedAlarm) {
         val me = _uid.value ?: return
-        launchAction("Couldn't remove the alarm") {
+        launchAction(str(R.string.alarm_error_remove)) {
             if (alarm.ownerId == me) AlarmRepository.deleteAlarm(alarm.id)
             else AlarmRepository.removeMember(alarm.id, me)
         }

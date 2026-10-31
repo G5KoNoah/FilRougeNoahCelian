@@ -1,10 +1,13 @@
 package ca.uqac.mobile.projetfilrouge.viewModel
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.annotation.StringRes
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
@@ -12,7 +15,13 @@ import ca.uqac.mobile.projetfilrouge.data.currentUid
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class AlarmEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
+class AlarmEditViewModel(
+    application: Application,
+    savedStateHandle: SavedStateHandle,
+) : AndroidViewModel(application) {
+
+    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     val ringtones = listOf("Classique", "Radar", "Carillon", "Réveil doux")
     val snoozeOptions = listOf("1 x 5 min", "2 x 3 min", "3 x 5 min")
@@ -71,9 +80,9 @@ class AlarmEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
             viewModelScope.launch {
                 try {
                     val alarm = AlarmRepository.observeAlarm(alarmId).first()
-                    if (alarm == null) error = "This alarm no longer exists" else fill(alarm)
+                    if (alarm == null) error = str(R.string.alarm_error_not_found) else fill(alarm)
                 } catch (e: Exception) {
-                    error = e.localizedMessage ?: "Couldn't load the alarm"
+                    error = e.localizedMessage ?: str(R.string.alarm_error_load)
                 } finally {
                     isLoading = false
                 }
@@ -132,7 +141,7 @@ class AlarmEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     fun save(onDone: () -> Unit) {
         val me = myUid ?: return
-        launchSaving("Couldn't save the alarm") {
+        launchSaving(str(R.string.alarm_error_save)) {
             val alarm = SharedAlarm(
                 id = alarmId.orEmpty(),
                 name = name.trim(),
@@ -152,7 +161,7 @@ class AlarmEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     fun deleteOrLeave(onDone: () -> Unit) {
         val me = myUid ?: return
         val id = alarmId ?: return
-        launchSaving("Couldn't remove the alarm") {
+        launchSaving(str(R.string.alarm_error_remove)) {
             if (isOwner) AlarmRepository.deleteAlarm(id) else AlarmRepository.removeMember(id, me)
             onDone()
         }

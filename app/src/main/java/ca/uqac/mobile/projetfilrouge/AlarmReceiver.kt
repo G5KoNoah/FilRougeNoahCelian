@@ -27,7 +27,7 @@ class AlarmReceiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Alarme",
+                context.getString(R.string.notification_channel_alarm),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setSound(
@@ -49,8 +49,8 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(intent.getStringExtra("name")?.ifBlank { null } ?: "Alarme")
-            .setContentText("C'est l'heure !")
+            .setContentTitle(intent.getStringExtra("name")?.ifBlank { null } ?: context.getString(R.string.notification_alarm_title))
+            .setContentText(context.getString(R.string.notification_alarm_text))
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(openAppIntent)

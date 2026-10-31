@@ -1,5 +1,7 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,9 +74,9 @@ private fun ContactsContent(
 
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
-        ScreenTitle("Contacts", Modifier.fillMaxWidth())
+        ScreenTitle(stringResource(R.string.contacts_title), Modifier.fillMaxWidth())
         IconButton(onClick = onAddContact, modifier = Modifier.align(Alignment.End)) {
-            Icon(Icons.Outlined.AddCircleOutline, contentDescription = "Add a contact")
+            Icon(Icons.Outlined.AddCircleOutline, contentDescription = stringResource(R.string.contacts_add))
         }
         if (error != null) {
             Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -82,16 +84,16 @@ private fun ContactsContent(
         }
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (requests.isNotEmpty()) {
-                item { SectionLabel("Received requests") }
+                item { SectionLabel(stringResource(R.string.contacts_received_requests)) }
                 items(requests, key = { "request-${it.id}" }) { request ->
                     RequestCard(request, onAccept = { onAccept(request) }, onDecline = { onDecline(request) })
                 }
-                item { SectionLabel("My contacts") }
+                item { SectionLabel(stringResource(R.string.contacts_mine)) }
             }
             if (friends.isEmpty()) {
                 item {
                     Text(
-                        "No contacts yet",
+                        stringResource(R.string.contacts_empty),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -106,16 +108,16 @@ private fun ContactsContent(
     friendToRemove?.let { friend ->
         AlertDialog(
             onDismissRequest = { friendToRemove = null },
-            title = { Text("Remove this contact?") },
-            text = { Text("${friend.displayName} will be removed from your contacts, and you from theirs.") },
+            title = { Text(stringResource(R.string.contacts_remove_title)) },
+            text = { Text(stringResource(R.string.contacts_remove_message, friend.displayName)) },
             confirmButton = {
                 TextButton(onClick = {
                     onRemove(friend)
                     friendToRemove = null
-                }) { Text("Remove") }
+                }) { Text(stringResource(R.string.contacts_remove)) }
             },
             dismissButton = {
-                TextButton(onClick = { friendToRemove = null }) { Text("Cancel") }
+                TextButton(onClick = { friendToRemove = null }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -147,7 +149,7 @@ private fun ContactCard(friend: Friend, onRemove: () -> Unit) {
                 )
             }
             IconButton(onClick = onRemove, modifier = Modifier.align(Alignment.TopEnd)) {
-                Icon(Icons.Outlined.RemoveCircleOutline, contentDescription = "Remove ${friend.displayName}")
+                Icon(Icons.Outlined.RemoveCircleOutline, contentDescription = stringResource(R.string.contacts_remove_named, friend.displayName))
             }
         }
     }
@@ -167,8 +169,8 @@ private fun RequestCard(request: FriendRequest, onAccept: () -> Unit, onDecline:
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onDecline) { Text("Decline") }
-            PrimaryButton("Accept", onClick = onAccept)
+            TextButton(onClick = onDecline) { Text(stringResource(R.string.contacts_decline)) }
+            PrimaryButton(stringResource(R.string.accept), onClick = onAccept)
         }
     }
 }

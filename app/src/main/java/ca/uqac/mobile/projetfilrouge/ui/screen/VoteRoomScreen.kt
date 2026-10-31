@@ -1,5 +1,7 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +46,7 @@ import kotlin.math.sin
 @Composable
 fun VoteRoomScreen() {
     ScreenLayout {
-        BackHeader("Salle de Vote")
+        BackHeader(stringResource(R.string.vote_title))
         Spacer(Modifier.height(24.dp))
         AppCard {
             ProposalTabs()
@@ -67,8 +69,8 @@ fun VoteRoomScreen() {
                 .padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         ) {
-            SecondaryButton("Against", contentColor = VoteAgainst)
-            PrimaryButton("For", contentColor = VoteFor)
+            SecondaryButton(stringResource(R.string.vote_against), contentColor = VoteAgainst)
+            PrimaryButton(stringResource(R.string.vote_for), contentColor = VoteFor)
         }
     }
 }

@@ -1,9 +1,12 @@
 package ca.uqac.mobile.projetfilrouge.viewModel
 
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.annotation.StringRes
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.data.Friend
 import ca.uqac.mobile.projetfilrouge.data.FriendRepository
@@ -21,7 +24,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class AddContactViewModel : ViewModel() {
+class AddContactViewModel(application: Application) : AndroidViewModel(application) {
+
+    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     private val me: String? = currentUid
 
@@ -59,7 +65,7 @@ class AddContactViewModel : ViewModel() {
 
     init {
         if (me == null) {
-            error = "No user signed in"
+            error = str(R.string.error_no_user)
         } else {
             viewModelScope.launch {
                 FriendRepository.observeFriendUids(me)
@@ -127,6 +133,6 @@ class AddContactViewModel : ViewModel() {
     }
 
     private fun showError(e: Throwable) {
-        error = e.localizedMessage ?: "Supabase error"
+        error = e.localizedMessage ?: str(R.string.error_server)
     }
 }

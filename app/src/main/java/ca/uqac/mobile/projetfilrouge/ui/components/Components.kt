@@ -1,5 +1,8 @@
 package ca.uqac.mobile.projetfilrouge.ui.components
 
+import androidx.annotation.StringRes
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,10 +59,10 @@ import ca.uqac.mobile.projetfilrouge.AppVibrator
 val CardShape = RoundedCornerShape(12.dp)
 private val PillShape = RoundedCornerShape(8.dp)
 
-enum class NavTab(val route: String, val icon: ImageVector, val label: String) {
-    Alarms("alarms", Icons.Outlined.Alarm, "Alarms"),
-    Contacts("contacts", Icons.Outlined.PermContactCalendar, "Contacts"),
-    Profile("account", Icons.Outlined.Person, "Profile"),
+enum class NavTab(val route: String, val icon: ImageVector, @StringRes val labelRes: Int) {
+    Alarms("alarms", Icons.Outlined.Alarm, R.string.tab_alarms),
+    Contacts("contacts", Icons.Outlined.PermContactCalendar, R.string.tab_contacts),
+    Profile("account", Icons.Outlined.Person, R.string.tab_profile),
 }
 
 @Composable
@@ -103,7 +106,7 @@ fun BottomNavBar(selectedTab: NavTab, onTabSelected: (NavTab) -> Unit) {
                         .clickable { onTabSelected(tab) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Icon(tab.icon, contentDescription = tab.label)
+                    Icon(tab.icon, contentDescription = stringResource(tab.labelRes))
                 }
             }
         }
@@ -129,7 +132,7 @@ fun BackHeader(title: String, onBack: () -> Unit = {}) {
             .padding(vertical = 16.dp)
     ) {
         IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
         }
         ScreenTitle(title, Modifier.align(Alignment.Center))
     }

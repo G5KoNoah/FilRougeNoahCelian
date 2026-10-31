@@ -1,6 +1,7 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -83,7 +84,7 @@ fun MainInfo(account: AccountData?, uid: String?, modifier: Modifier = Modifier)
     ) {
         Image(
             painter = painterResource(id = R.drawable.uqac_logo),
-            contentDescription = "Logo UQAC",
+            contentDescription = stringResource(R.string.logo_uqac),
             modifier = Modifier.size(120.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -99,7 +100,7 @@ fun MainInfo(account: AccountData?, uid: String?, modifier: Modifier = Modifier)
 @Composable
 fun OtherInfo(account: AccountData?, modifier: Modifier = Modifier) {
     Column(modifier = modifier.cardStyle()) {
-        Text("Contact", color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.account_contact), color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             //Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
@@ -115,14 +116,14 @@ fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
     val viewModel: SettingsViewModel = viewModel()
     val estSombre by viewModel.estSombre.collectAsStateWithLifecycle()
     Column(modifier = modifier.cardStyle()) {
-        Text("Settings", color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.account_settings), color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Theme :", color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(R.string.account_theme), color = MaterialTheme.colorScheme.onSurface)
             Switch(
                 checked = estSombre,
                 onCheckedChange = { nouvelleValeur ->
@@ -149,7 +150,7 @@ fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
                 contentColor = Color.White
             )
         ) {
-            Text("Logout")
+            Text(stringResource(R.string.account_logout))
         }
     }
 }

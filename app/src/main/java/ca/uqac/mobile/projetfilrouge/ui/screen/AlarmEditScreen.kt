@@ -1,5 +1,8 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import androidx.compose.ui.res.stringArrayResource
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -88,35 +91,35 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
                         onMinuteChange = viewModel::onMinuteChange,
                     )
                     DaysRow(selected = viewModel.days, onToggle = viewModel::toggleDay)
-                    PillTextField(value = viewModel.name, onValueChange = { viewModel.onNameChange(it) }, placeholder = "Alarm name")
-                    PillDropdown(viewModel.ringtone ?: "Ringtone", viewModel.ringtones, onSelect = { viewModel.onRingtoneSelected(it) })
+                    PillTextField(value = viewModel.name, onValueChange = { viewModel.onNameChange(it) }, placeholder = stringResource(R.string.alarm_name))
+                    PillDropdown(viewModel.ringtone ?: stringResource(R.string.alarm_ringtone), viewModel.ringtones, onSelect = { viewModel.onRingtoneSelected(it) })
                     PillDropdown(viewModel.snooze, viewModel.snoozeOptions, onSelect = { viewModel.onSnoozeSelected(it) })
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         PillDropdown(
-                            viewModel.pollDuration ?: "Poll duration",
+                            viewModel.pollDuration ?: stringResource(R.string.alarm_poll_duration),
                             viewModel.pollDurations,
                             onSelect = { viewModel.onPollDurationSelected(it) },
                             modifier = Modifier.weight(1f),
                         )
-                        PrimaryButton("Start poll")
+                        PrimaryButton(stringResource(R.string.alarm_start_poll))
                     }
                 }
             }
 
-            SwitchRow("Sound", checked = viewModel.sound, onCheckedChange = viewModel::onSoundChange)
-            SwitchRow("Vibrations", checked = viewModel.vibrations, onCheckedChange = viewModel::onVibrationsChange)
+            SwitchRow(stringResource(R.string.alarm_sound), checked = viewModel.sound, onCheckedChange = viewModel::onSoundChange)
+            SwitchRow(stringResource(R.string.alarm_vibrations), checked = viewModel.vibrations, onCheckedChange = viewModel::onVibrationsChange)
 
             AppCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("Members", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.alarm_members), style = MaterialTheme.typography.labelMedium)
                         MemberAvatars(viewModel.members.size.coerceAtMost(6))
                     }
                     IconButton(onClick = {}) {
-                        Icon(Icons.Outlined.PersonAddAlt, contentDescription = "Add a member")
+                        Icon(Icons.Outlined.PersonAddAlt, contentDescription = stringResource(R.string.alarm_add_member))
                     }
                 }
             }
@@ -127,15 +130,15 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         ) {
-            SecondaryButton("Cancel", onClick = onBackScreen)
+            SecondaryButton(stringResource(R.string.cancel), onClick = onBackScreen)
             if (!viewModel.isNew) {
                 SecondaryButton(
-                    if (viewModel.isOwner) "Delete" else "Leave",
+                    stringResource(if (viewModel.isOwner) R.string.alarm_delete else R.string.alarm_leave),
                     contentColor = MaterialTheme.colorScheme.error,
                     onClick = { confirmRemove = true },
                 )
             }
-            PrimaryButton("Save", enabled = !viewModel.isSaving, onClick = { viewModel.save(onDone = onBackScreen) })
+            PrimaryButton(stringResource(R.string.alarm_save), enabled = !viewModel.isSaving, onClick = { viewModel.save(onDone = onBackScreen) })
         }
         Spacer(Modifier.height(16.dp))
     }
@@ -143,20 +146,20 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
     if (confirmRemove) {
         AlertDialog(
             onDismissRequest = { confirmRemove = false },
-            title = { Text(if (viewModel.isOwner) "Delete this alarm?" else "Leave this alarm?") },
+            title = { Text(stringResource(if (viewModel.isOwner) R.string.alarm_delete_title else R.string.alarm_leave_title)) },
             text = {
                 Text(
-                    if (viewModel.isOwner) "The alarm will be deleted for every member."
-                    else "You won't receive this alarm anymore."
+                    if (viewModel.isOwner) stringResource(R.string.alarm_delete_message)
+                    else stringResource(R.string.alarm_leave_message)
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
                     confirmRemove = false
                     viewModel.deleteOrLeave(onDone = onBackScreen)
-                }) { Text(if (viewModel.isOwner) "Delete" else "Leave") }
+                }) { Text(stringResource(if (viewModel.isOwner) R.string.alarm_delete else R.string.alarm_leave)) }
             },
-            dismissButton = { TextButton(onClick = { confirmRemove = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { confirmRemove = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }
@@ -226,7 +229,7 @@ private fun NumberWheel(count: Int, initial: Int, onValueChange: (Int) -> Unit) 
 
 @Composable
 private fun DaysRow(selected: Set<Int>, onToggle: (Int) -> Unit) {
-    val days = listOf("S", "M", "T", "W", "T", "F", "S")
+    val days = stringArrayResource(R.array.day_letters)
     Row(
         modifier = Modifier
             .fillMaxWidth()

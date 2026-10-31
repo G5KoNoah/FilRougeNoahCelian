@@ -1,5 +1,6 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -73,7 +74,7 @@ fun Logo(modifier: Modifier, verticalArrangement: Arrangement.Vertical) {
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
         Image(
             painter = painterResource(id = R.drawable.uqac_logo),
-            contentDescription = "C'est l'école"
+            contentDescription = stringResource(R.string.logo_uqac)
         )
     }
 
@@ -88,6 +89,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
     var message by remember { mutableStateOf<String?>(null) }
     var estErreur by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -97,7 +99,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Login to your account",
+            text = stringResource(R.string.login_title),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -106,7 +108,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
         TextField(
             value = emailText,
             onValueChange = { emailText = it },
-            placeholder = { Text("Login") },
+            placeholder = { Text(stringResource(R.string.login_email)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
@@ -116,7 +118,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
         TextField(
             value = passwordText,
             onValueChange = { passwordText = it },
-            placeholder = { Text("Password") },
+            placeholder = { Text(stringResource(R.string.login_password)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation()
@@ -127,7 +129,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
                 // Supabase refuse la requête si un champ est vide : on vérifie avant
                 if (emailText.isBlank() || passwordText.isEmpty()) {
                     estErreur = true
-                    message = "Error mail or password"
+                    message = context.getString(R.string.login_error_empty)
                     return@Button
                 }
                 message = null
@@ -138,11 +140,11 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
                             password = passwordText
                         }
                         estErreur = false
-                        message = "Login success"
+                        message = context.getString(R.string.login_success)
                         onLogin()
                     } catch (e: Exception) {
                         estErreur = true
-                        message = e.localizedMessage ?: "Error login"
+                        message = e.localizedMessage ?: context.getString(R.string.login_error)
                     }
                 }
             },
@@ -153,7 +155,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
             )
         ) {
             Text(
-                text = "Login",
+                text = stringResource(R.string.login_button),
                 modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
                 fontSize = 20.sp,
                 color = Color.White,

@@ -1,5 +1,8 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import androidx.compose.ui.platform.LocalContext
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -78,6 +81,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
     val forme = RoundedCornerShape(16.dp)
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -87,7 +91,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Create your account",
+            text = stringResource(R.string.sign_title),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -96,7 +100,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
         TextField(
             value = emailText,
             onValueChange = { emailText = it },
-            placeholder = { Text("Login") },
+            placeholder = { Text(stringResource(R.string.login_email)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth()
@@ -106,7 +110,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
         TextField(
             value = passwordText,
             onValueChange = { passwordText = it },
-            placeholder = { Text("Password") },
+            placeholder = { Text(stringResource(R.string.login_password)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -117,7 +121,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
         TextField(
             value = confirmPasswordText,
             onValueChange = { confirmPasswordText = it },
-            placeholder = { Text("Confirm Password") },
+            placeholder = { Text(stringResource(R.string.sign_confirm_password)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -128,7 +132,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
         TextField(
             value = firstNameText,
             onValueChange = { firstNameText = it },
-            placeholder = { Text("First name") },
+            placeholder = { Text(stringResource(R.string.sign_first_name)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -137,7 +141,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
         TextField(
             value = lastNameText,
             onValueChange = { lastNameText = it },
-            placeholder = { Text("Last name") },
+            placeholder = { Text(stringResource(R.string.sign_last_name)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -147,9 +151,9 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
             onClick = {
                 // Vérifications avant d'appeler Supabase
                 val erreur = when {
-                    emailText.isBlank() -> "Entre ton adresse mail"
-                    passwordText.length < 6 -> "Le mot de passe doit faire au moins 6 caractères"
-                    passwordText != confirmPasswordText -> "Les mots de passe ne correspondent pas"
+                    emailText.isBlank() -> context.getString(R.string.sign_error_email)
+                    passwordText.length < 6 -> context.getString(R.string.sign_error_password_length)
+                    passwordText != confirmPasswordText -> context.getString(R.string.sign_error_password_match)
                     else -> null
                 }
                 if (erreur != null) {
@@ -172,12 +176,12 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
                             }
                         }
                         isError = false
-                        message = "Compte créé avec succès"
+                        message = context.getString(R.string.sign_success)
                         onLogin()
                     } catch (e: Exception) {
                         // Erreur (email déjà utilisé, mail invalide...)
                         isError = true
-                        message = e.localizedMessage ?: "Erreur lors de la création du compte"
+                        message = e.localizedMessage ?: context.getString(R.string.sign_error)
                     } finally {
                         isUsing = false
                     }
@@ -191,7 +195,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
             )
         ) {
             Text(
-                text = "Sign up",
+                text = stringResource(R.string.sign_button),
                 modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
                 fontSize = 20.sp,
                 color = Color.White,

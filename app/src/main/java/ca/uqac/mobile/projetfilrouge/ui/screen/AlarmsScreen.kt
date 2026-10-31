@@ -1,5 +1,10 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import androidx.annotation.PluralsRes
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringArrayResource
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.compose.ui.res.stringResource
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -95,18 +100,18 @@ private fun AlarmsContent(
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
         ScreenTitle(
-            if (nextAlarm != null) untilText(nextAlarm, now) else "No alarm\nscheduled",
+            if (nextAlarm != null) untilText(nextAlarm, now) else stringResource(R.string.alarms_none_scheduled),
             Modifier.fillMaxWidth(),
         )
         IconButton(onClick = onAdd, modifier = Modifier.align(Alignment.End)) {
-            Icon(Icons.Outlined.AddCircleOutline, contentDescription = "Add an alarm")
+            Icon(Icons.Outlined.AddCircleOutline, contentDescription = stringResource(R.string.alarms_add))
         }
         error?.let {
             Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
         if (alarms.isEmpty()) {
             Text(
-                "No alarms yet. Tap + to create one.",
+                stringResource(R.string.alarms_empty),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -160,25 +165,30 @@ private fun AlarmCard(
     }
 }
 
-private val DayNames = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-
-private fun daysLabel(days: List<Int>): String = when {
-    days.isEmpty() || days.size == 7 -> "Every day"
-    days.sorted() == listOf(1, 2, 3, 4, 5) -> "Weekdays"
-    days.sorted() == listOf(0, 6) -> "Weekends"
-    else -> days.sorted().joinToString(", ") { DayNames[it] }
+@Composable
+private fun daysLabel(days: List<Int>): String {
+    val dayNames = stringArrayResource(R.array.day_names_short)
+    return when {
+        days.isEmpty() || days.size == 7 -> stringResource(R.string.alarms_every_day)
+        days.sorted() == listOf(1, 2, 3, 4, 5) -> stringResource(R.string.alarms_weekdays)
+        days.sorted() == listOf(0, 6) -> stringResource(R.string.alarms_weekends)
+        else -> days.sorted().joinToString(", ") { dayNames[it] }
+    }
 }
 
+@Composable
 private fun untilText(targetMillis: Long, nowMillis: Long): String {
     val totalMinutes = (targetMillis - nowMillis + 59_999) / 60_000
     val days = totalMinutes / (24 * 60)
     val hours = (totalMinutes / 60) % 24
     val minutes = totalMinutes % 60
-    fun plural(value: Long, word: String) = if (value == 1L) "1 $word" else "$value ${word}s"
+    // pluralStringResource choisit "1 hour" / "2 hours" (ou "1 heure" / "2 heures") selon la langue
+    @Composable
+    fun plural(@PluralsRes id: Int, value: Long) = pluralStringResource(id, value.toInt(), value.toInt())
     return if (days > 0) {
-        "Alarm in ${plural(days, "day")}\nand ${plural(hours, "hour")}"
+        stringResource(R.string.alarms_in, plural(R.plurals.duration_days, days), plural(R.plurals.duration_hours, hours))
     } else {
-        "Alarm in ${plural(hours, "hour")}\nand ${plural(minutes, "minute")}"
+        stringResource(R.string.alarms_in, plural(R.plurals.duration_hours, hours), plural(R.plurals.duration_minutes, minutes))
     }
 }
 

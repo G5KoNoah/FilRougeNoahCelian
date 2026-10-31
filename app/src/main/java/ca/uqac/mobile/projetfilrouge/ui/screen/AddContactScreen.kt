@@ -1,5 +1,7 @@
 package ca.uqac.mobile.projetfilrouge.ui.screen
 
+import ca.uqac.mobile.projetfilrouge.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -72,7 +74,7 @@ private fun AddContactContent(
     onBack: () -> Unit,
 ) {
     ScreenLayout {
-        BackHeader("Add\na Contact", onBack = onBack)
+        BackHeader(stringResource(R.string.add_contact_title), onBack = onBack)
         Spacer(Modifier.height(24.dp))
         TextField(
             value = query,
@@ -82,7 +84,7 @@ private fun AddContactContent(
             trailingIcon = {
                 if (isSearching) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
             },
-            placeholder = { Text("Name or email") },
+            placeholder = { Text(stringResource(R.string.add_contact_search)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             shape = CardShape,
@@ -97,8 +99,8 @@ private fun AddContactContent(
 
         when {
             error != null -> Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-            query.trim().length < 2 -> HintText("Type at least 2 letters to search")
-            !isSearching && results.isEmpty() -> HintText("No accounts found")
+            query.trim().length < 2 -> HintText(stringResource(R.string.add_contact_hint_min))
+            !isSearching && results.isEmpty() -> HintText(stringResource(R.string.add_contact_no_results))
         }
 
         LazyColumn(
@@ -140,10 +142,10 @@ private fun UserCard(
                 )
             }
             when (result.status) {
-                FriendStatus.NONE -> PrimaryButton("Add", enabled = !isPending, onClick = onSendRequest)
-                FriendStatus.REQUEST_RECEIVED -> PrimaryButton("Accept", enabled = !isPending, onClick = onAcceptRequest)
-                FriendStatus.REQUEST_SENT -> HintText("Sent")
-                FriendStatus.FRIEND -> HintText("Friend")
+                FriendStatus.NONE -> PrimaryButton(stringResource(R.string.add_contact_add), enabled = !isPending, onClick = onSendRequest)
+                FriendStatus.REQUEST_RECEIVED -> PrimaryButton(stringResource(R.string.accept), enabled = !isPending, onClick = onAcceptRequest)
+                FriendStatus.REQUEST_SENT -> HintText(stringResource(R.string.add_contact_sent))
+                FriendStatus.FRIEND -> HintText(stringResource(R.string.add_contact_friend))
             }
         }
     }

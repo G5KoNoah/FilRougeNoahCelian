@@ -1,4 +1,144 @@
 <resources>
     <string name="app_name">ProjetFilRouge</string>
+
+    <!-- Common -->
+    <string name="cancel">Cancel</string>
+    <string name="accept">Accept</string>
+    <string name="back">Back</string>
+    <string name="logo_uqac">UQAC logo</string>
+    <string name="error_no_user">No user signed in</string>
+    <string name="error_server">Server error</string>
+
+    <!-- Navigation -->
+    <string name="tab_alarms">Alarms</string>
+    <string name="tab_contacts">Contacts</string>
+    <string name="tab_profile">Profile</string>
+
+    <!-- Login -->
+    <string name="login_title">Login to your account</string>
+    <string name="login_email">Login</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Login</string>
+    <string name="login_error_empty">Enter your email and password</string>
+    <string name="login_success">Logged in</string>
+    <string name="login_error">Couldn\'t log in</string>
     <string name="or_sign_in">or sign in</string>
+
+    <!-- Sign up -->
+    <string name="sign_title">Create your account</string>
+    <string name="sign_confirm_password">Confirm Password</string>
+    <string name="sign_first_name">First name</string>
+    <string name="sign_last_name">Last name</string>
+    <string name="sign_button">Sign up</string>
+    <string name="sign_error_email">Enter your email address</string>
+    <string name="sign_error_password_length">The password must be at least 6 characters long</string>
+    <string name="sign_error_password_match">The passwords don\'t match</string>
+    <string name="sign_success">Account created</string>
+    <string name="sign_error">Couldn\'t create the account</string>
+
+    <!-- Account -->
+    <string name="account_contact">Contact</string>
+    <string name="account_settings">Settings</string>
+    <string name="account_theme">Theme:</string>
+    <string name="account_logout">Logout</string>
+    <string name="account_not_found">Profile not found</string>
+
+    <!-- Alarms list -->
+    <string name="alarms_none_scheduled">No alarm\nscheduled</string>
+    <string name="alarms_add">Add an alarm</string>
+    <string name="alarms_empty">No alarms yet. Tap + to create one.</string>
+    <string name="alarms_every_day">Every day</string>
+    <string name="alarms_weekdays">Weekdays</string>
+    <string name="alarms_weekends">Weekends</string>
+    <string name="alarms_in">Alarm in %1$s\nand %2$s</string>
+    <plurals name="duration_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <!-- Sunday first, matches Calendar.DAY_OF_WEEK - 1 -->
+    <string-array name="day_names_short">
+        <item>Sun</item>
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+    </string-array>
+    <string-array name="day_letters">
+        <item>S</item>
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+    </string-array>
+
+    <!-- Alarm edit -->
+    <string name="alarm_name">Alarm name</string>
+    <string name="alarm_ringtone">Ringtone</string>
+    <string name="alarm_poll_duration">Poll duration</string>
+    <string name="alarm_start_poll">Start poll</string>
+    <string name="alarm_sound">Sound</string>
+    <string name="alarm_vibrations">Vibrations</string>
+    <string name="alarm_members">Members</string>
+    <string name="alarm_add_member">Add a member</string>
+    <string name="alarm_save">Save</string>
+    <string name="alarm_delete">Delete</string>
+    <string name="alarm_leave">Leave</string>
+    <string name="alarm_delete_title">Delete this alarm?</string>
+    <string name="alarm_leave_title">Leave this alarm?</string>
+    <string name="alarm_delete_message">The alarm will be deleted for every member.</string>
+    <string name="alarm_leave_message">You won\'t receive this alarm anymore.</string>
+    <string name="alarm_error_not_found">This alarm no longer exists</string>
+    <string name="alarm_error_load">Couldn\'t load the alarm</string>
+    <string name="alarm_error_save">Couldn\'t save the alarm</string>
+    <string name="alarm_error_create">Couldn\'t create the alarm</string>
+    <string name="alarm_error_update">Couldn\'t update the alarm</string>
+    <string name="alarm_error_change">Couldn\'t change the alarm</string>
+    <string name="alarm_error_add_member">Couldn\'t add this member</string>
+    <string name="alarm_error_remove">Couldn\'t remove the alarm</string>
+
+    <!-- Alarm notification -->
+    <string name="notification_channel_alarm">Alarm</string>
+    <string name="notification_alarm_title">Alarm</string>
+    <string name="notification_alarm_text">It\'s time!</string>
+
+    <!-- Contacts -->
+    <string name="contacts_title">Contacts</string>
+    <string name="contacts_add">Add a contact</string>
+    <string name="contacts_received_requests">Received requests</string>
+    <string name="contacts_mine">My contacts</string>
+    <string name="contacts_empty">No contacts yet</string>
+    <string name="contacts_remove_title">Remove this contact?</string>
+    <string name="contacts_remove_message">%1$s will be removed from your contacts, and you from theirs.</string>
+    <string name="contacts_remove">Remove</string>
+    <string name="contacts_remove_named">Remove %1$s</string>
+    <string name="contacts_decline">Decline</string>
+    <string name="contacts_error_accept">Couldn\'t accept the request</string>
+    <string name="contacts_error_decline">Couldn\'t decline the request</string>
+    <string name="contacts_error_remove">Couldn\'t remove this contact</string>
+
+    <!-- Add contact -->
+    <string name="add_contact_title">Add\na Contact</string>
+    <string name="add_contact_search">Name or email</string>
+    <string name="add_contact_hint_min">Type at least 2 letters to search</string>
+    <string name="add_contact_no_results">No accounts found</string>
+    <string name="add_contact_add">Add</string>
+    <string name="add_contact_sent">Sent</string>
+    <string name="add_contact_friend">Friend</string>
+
+    <!-- Vote room -->
+    <string name="vote_title">Vote Room</string>
+    <string name="vote_against">Against</string>
+    <string name="vote_for">For</string>
 </resources>
