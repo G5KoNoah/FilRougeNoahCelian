@@ -141,4 +141,17 @@
     <string name="vote_title">Vote Room</string>
     <string name="vote_against">Against</string>
     <string name="vote_for">For</string>
+    <string name="vote_no_polls">No vote in progress for this alarm.</string>
+    <string name="vote_time_left">%1$s left</string>
+    <string name="vote_ended">Vote ended</string>
+    <string name="vote_progress">%1$d / %2$d votes needed</string>
+    <string name="vote_error">Couldn\'t send your vote</string>
+    <string name="vote_ringtone">Ringtone: %1$s</string>
+    <string name="vote_snooze">Snooze: %1$s</string>
+    <string name="vote_change">%1$s → %2$s</string>
+
+    <!-- Alarm edit: votes -->
+    <string name="alarm_poll_needed">Time, days, ringtone and snooze are shared: changing them needs a vote. Save only keeps the name, sound and vibrations.</string>
+    <string name="alarm_open_vote_room">Vote room</string>
+    <string name="alarm_error_poll">Couldn\'t start the vote</string>
 </resources>

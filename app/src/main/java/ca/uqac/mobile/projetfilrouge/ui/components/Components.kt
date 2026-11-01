@@ -180,11 +180,13 @@ fun SecondaryButton(
     text: String,
     modifier: Modifier = Modifier,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    enabled: Boolean = true,
     onClick: ()-> Unit = {}
 ) {
     Button(
         onClick = {onClick()},
         modifier = modifier,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = contentColor,

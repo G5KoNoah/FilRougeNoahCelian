@@ -64,7 +64,7 @@ import kotlinx.coroutines.flow.filter
 
 
 @Composable
-fun AlarmEditScreen(onBackScreen: ()-> Unit) {
+fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = {}) {
     val viewModel : AlarmEditViewModel = viewModel()
     var confirmRemove by remember { mutableStateOf(false) }
     ScreenLayout {
@@ -104,7 +104,24 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit) {
                             onSelect = { viewModel.onPollDurationSelected(it) },
                             modifier = Modifier.weight(1f),
                         )
-                        PrimaryButton(stringResource(R.string.alarm_start_poll))
+                        PrimaryButton(
+                            stringResource(R.string.alarm_start_poll),
+                            enabled = viewModel.canStartPoll && !viewModel.isSaving,
+                            onClick = { viewModel.startPoll { viewModel.alarmId?.let(onOpenVoteRoom) } },
+                        )
+                    }
+                    // Alarme partagée : on explique pourquoi Save ne change pas l'heure, et on donne accès aux votes en cours
+                    if (viewModel.needsVote) {
+                        Text(
+                            stringResource(R.string.alarm_poll_needed),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        viewModel.alarmId?.let { id ->
+                            TextButton(onClick = { onOpenVoteRoom(id) }) {
+                                Text(stringResource(R.string.alarm_open_vote_room))
+                            }
+                        }
                     }
                 }
             }

@@ -143,4 +143,17 @@
     <string name="vote_title">Salle de vote</string>
     <string name="vote_against">Contre</string>
     <string name="vote_for">Pour</string>
+    <string name="vote_no_polls">Aucun vote en cours pour cette alarme.</string>
+    <string name="vote_time_left">Encore %1$s</string>
+    <string name="vote_ended">Vote terminé</string>
+    <string name="vote_progress">%1$d / %2$d votes nécessaires</string>
+    <string name="vote_error">Impossible d\'envoyer ton vote</string>
+    <string name="vote_ringtone">Sonnerie : %1$s</string>
+    <string name="vote_snooze">Rappel : %1$s</string>
+    <string name="vote_change">%1$s → %2$s</string>
+
+    <!-- Modifier une alarme : votes -->
+    <string name="alarm_poll_needed">L\'heure, les jours, la sonnerie et le rappel sont partagés : les changer demande un vote. Enregistrer ne garde que le nom, le son et les vibrations.</string>
+    <string name="alarm_open_vote_room">Salle de vote</string>
+    <string name="alarm_error_poll">Impossible de lancer le vote</string>
 </resources>

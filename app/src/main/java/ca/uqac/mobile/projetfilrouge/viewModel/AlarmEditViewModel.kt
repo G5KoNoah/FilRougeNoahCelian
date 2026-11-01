@@ -10,10 +10,16 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
+import ca.uqac.mobile.projetfilrouge.data.PollRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.data.currentUid
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 class AlarmEditViewModel(
     application: Application,
@@ -22,7 +28,9 @@ class AlarmEditViewModel(
 
     // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
     private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
-
+    // l'alarme telle qu'elle était à l'ouverture de l'écran
+    // (état Compose : needsVote et canStartPoll se mettent à jour à l'écran quand l'alarme est chargée)
+    private var original by mutableStateOf<SharedAlarm?>(null)
     val ringtones = listOf("Classique", "Radar", "Carillon", "Réveil doux")
     val snoozeOptions = listOf("1 x 5 min", "2 x 3 min", "3 x 5 min")
     val pollDurations = listOf("2 min", "5 min", "10 min")
@@ -101,6 +109,7 @@ class AlarmEditViewModel(
         sound = alarm.sound
         vibrations = alarm.vibrations
         members = alarm.members
+        original = alarm
     }
 
     fun onHourChange(value: Int) {
@@ -142,14 +151,15 @@ class AlarmEditViewModel(
     fun save(onDone: () -> Unit) {
         val me = myUid ?: return
         launchSaving(str(R.string.alarm_error_save)) {
+            val o = original
             val alarm = SharedAlarm(
                 id = alarmId.orEmpty(),
                 name = name.trim(),
-                hour = hour,
-                minute = minute,
-                days = days.sorted(),
-                ringtone = ringtone.orEmpty(),
-                snooze = snooze,
+                hour = if (needsVote && o != null) o.hour else hour,
+                minute = if (needsVote && o != null) o.minute else minute,
+                days = if (needsVote && o != null) o.days else days.sorted(),
+                ringtone = if (needsVote && o != null) o.ringtone else ringtone.orEmpty(),
+                snooze = if (needsVote && o != null) o.snooze else snooze,
                 sound = sound,
                 vibrations = vibrations,
             )
@@ -180,5 +190,41 @@ class AlarmEditViewModel(
                 isSaving = false
             }
         }
+    }
+
+
+    // Une alarme à plusieurs membres demande un vote pour ces réglages
+    val needsVote: Boolean get() = (original?.members?.size ?: 0) > 1
+
+    // Seulement les réglages votables qui ont changé
+    fun votedChanges(): JsonObject {
+        val o = original ?: return JsonObject(emptyMap())
+        return buildJsonObject {
+            if (hour != o.hour) put("hour", hour)
+            if (minute != o.minute) put("minute", minute)
+            if (days.sorted() != o.days.sorted()) put("days",
+                JsonArray(days.sorted().map { JsonPrimitive(it) })
+            )
+            if (ringtone.orEmpty() != o.ringtone) put("ringtone", ringtone.orEmpty())
+            // fill() remplace un snooze vide par "2 x 3 min" : on compare avec la même valeur
+            if (snooze != o.snooze.ifBlank { DEFAULT_SNOOZE }) put("snooze", snooze)
+        }
+    }
+
+    // Le bouton "Start poll" n'est actif que s'il y a quelque chose à voter et une durée choisie
+    val canStartPoll: Boolean
+        get() = !isNew && needsVote && pollDuration != null && votedChanges().isNotEmpty()
+
+    fun startPoll(onCreated: () -> Unit) {
+        val id = alarmId ?: return
+        val minutes = pollDuration?.substringBefore(" ")?.toIntOrNull() ?: return   // "5 min" -> 5
+        launchSaving(str(R.string.alarm_error_poll)) {
+            PollRepository.createPoll(id, votedChanges(), minutes)
+            onCreated()
+        }
+    }
+
+    private companion object {
+        const val DEFAULT_SNOOZE = "2 x 3 min"
     }
 }

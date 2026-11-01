@@ -85,9 +85,10 @@ fun NavGraph() {
                     defaultValue = null
                 }),
             ) {
-                AlarmEditScreen( onBackScreen = {
-                    navController.popBackStack()
-                })
+                AlarmEditScreen(
+                    onBackScreen = { navController.popBackStack() },
+                    onOpenVoteRoom = { alarmId -> navController.navigate("voteRoom/$alarmId") },
+                )
             }
             composable(NavTab.Alarms.route) {
                 AlarmsScreen( onAlarmEdit = { alarmId ->
@@ -111,8 +112,12 @@ fun NavGraph() {
                     navController.popBackStack()
                 })
             }
-            composable("voteRoom"){
-                VoteRoomScreen()
+            // Une salle de vote par alarme : VoteRoomViewModel lit alarmId dans son SavedStateHandle
+            composable(
+                "voteRoom/{alarmId}",
+                arguments = listOf(navArgument("alarmId") { type = NavType.StringType }),
+            ) {
+                VoteRoomScreen(onBack = { navController.popBackStack() })
             }
         }
     }
