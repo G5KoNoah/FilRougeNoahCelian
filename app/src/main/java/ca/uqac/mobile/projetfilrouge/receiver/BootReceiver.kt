@@ -1,8 +1,9 @@
-package ca.uqac.mobile.projetfilrouge
+package ca.uqac.mobile.projetfilrouge.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import ca.uqac.mobile.projetfilrouge.AlarmSync
 
 class BootReceiver : BroadcastReceiver(){
     override fun onReceive(context: Context, intent: Intent) {

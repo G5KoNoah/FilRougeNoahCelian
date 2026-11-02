@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
+import ca.uqac.mobile.projetfilrouge.receiver.AlarmReceiver
 import kotlinx.serialization.json.Json
 import java.util.Calendar
 
@@ -15,6 +16,8 @@ class AlarmScheduler (private val context: Context){
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("name", alarm.name)
             putExtra(EXTRA_ALARM, Json.encodeToString(SharedAlarm.serializer(), alarm))
+            putExtra("ifVibration", alarm.vibrations)
+            putExtra("ifSound", alarm.sound)
         }
         return PendingIntent.getBroadcast(
             context, alarm.requestCode, intent,       // id = requestCode

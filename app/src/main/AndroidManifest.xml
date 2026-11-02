@@ -33,8 +33,10 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".AlarmReceiver" android:exported="false" />
-        <receiver android:name=".BootReceiver" android:exported="true">
+        <receiver android:name=".receiver.AlarmReceiver" android:exported="false" />
+        <!-- Appelé quand on balaye la notification d'alarme : arrête la vibration -->
+        <receiver android:name=".receiver.StopAlarmReceiver" android:exported="false" />
+        <receiver android:name=".receiver.BootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

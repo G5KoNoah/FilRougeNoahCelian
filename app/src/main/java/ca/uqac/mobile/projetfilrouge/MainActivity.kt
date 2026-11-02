@@ -1,6 +1,6 @@
 package ca.uqac.mobile.projetfilrouge
 
-import android.app.AlarmManager
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,12 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ca.uqac.mobile.projetfilrouge.ui.screen.AccountScreen
-import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmEditScreen
-import ca.uqac.mobile.projetfilrouge.ui.screen.AlarmsScreen
-import ca.uqac.mobile.projetfilrouge.ui.screen.LoginScreen
-import ca.uqac.mobile.projetfilrouge.ui.screen.SignScreen
-import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
+import ca.uqac.mobile.projetfilrouge.receiver.AlarmReceiver
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
 
@@ -26,6 +21,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.d("Create","OnCreate")
         enableEdgeToEdge()
+        stopVibrationIfFromAlarm(intent)
         AlarmSync(applicationContext).start(lifecycleScope)
         setContent {
             // Même instance que celle de SettingsInfo (même activité) : le thème suit le switch
@@ -34,6 +30,20 @@ class MainActivity : ComponentActivity() {
             ProjetFilRougeTheme(darkTheme = estSombre) {
                 NavGraph()
             }
+        }
+    }
+
+    // L'app était déjà ouverte quand on a touché la notification
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        stopVibrationIfFromAlarm(intent)
+    }
+
+    // Ouverte depuis la notification d'alarme : on arrête la vibration lancée par AlarmReceiver
+    private fun stopVibrationIfFromAlarm(intent: Intent?) {
+        if (intent?.getBooleanExtra(AlarmReceiver.EXTRA_STOP_VIBRATION, false) == true) {
+            AppVibrator(this).stop()
+            intent.removeExtra(AlarmReceiver.EXTRA_STOP_VIBRATION)   // évite de rejouer ça après une rotation
         }
     }
 
