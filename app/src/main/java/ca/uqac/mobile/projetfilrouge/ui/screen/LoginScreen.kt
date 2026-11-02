@@ -175,7 +175,6 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
 
         Text(
             text = stringResource(R.string.or_sign_in),
-            color = Color.White,
             fontSize = 14.sp,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier

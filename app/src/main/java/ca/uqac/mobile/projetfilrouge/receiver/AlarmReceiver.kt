@@ -37,8 +37,6 @@ class AlarmReceiver : BroadcastReceiver() {
         val channelId = if (sound) CHANNEL_SOUND else CHANNEL_SILENT
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // On supprime les anciens canaux (sans effet s'ils n'existent pas) pour qu'ils disparaissent des réglages
-            OLD_CHANNEL_IDS.forEach { notificationManager.deleteNotificationChannel(it) }
 
             val channel = NotificationChannel(
                 channelId,
@@ -53,10 +51,9 @@ class AlarmReceiver : BroadcastReceiver() {
                             .build()
                     )
                 } else {
-                    // Sans cet appel, le canal prend le son de notification par défaut (et non le silence)
                     setSound(null, null)
                 }
-                enableVibration(false)   // sinon elle s'ajouterait à celle d'AppVibrator
+                enableVibration(false)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -106,9 +103,6 @@ class AlarmReceiver : BroadcastReceiver() {
         private const val CHANNEL_SOUND = "alarm_sound_v3"
         private const val CHANNEL_SILENT = "alarm_silent_v3"
 
-        private val OLD_CHANNEL_IDS = listOf(
-            "alarm_channel", "alarm_sound_vibration", "alarm_sound", "alarm_vibration", "alarm_silent",
-            "alarm_sound_vibration_v2", "alarm_sound_v2", "alarm_vibration_v2", "alarm_silent_v2",
-        )
+
     }
 }

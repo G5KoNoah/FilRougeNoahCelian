@@ -16,8 +16,6 @@ class AlarmScheduler (private val context: Context){
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("name", alarm.name)
             putExtra(EXTRA_ALARM, Json.encodeToString(SharedAlarm.serializer(), alarm))
-            putExtra("ifVibration", alarm.vibrations)
-            putExtra("ifSound", alarm.sound)
         }
         return PendingIntent.getBroadcast(
             context, alarm.requestCode, intent,       // id = requestCode
