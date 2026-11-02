@@ -55,6 +55,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
@@ -135,7 +137,7 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                         Text(stringResource(R.string.alarm_members), style = MaterialTheme.typography.labelMedium)
                         MemberAvatars(viewModel.members.size.coerceAtMost(6))
                     }
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = viewModel::openMemberPicker) {
                         Icon(Icons.Outlined.PersonAddAlt, contentDescription = stringResource(R.string.alarm_add_member))
                     }
                 }
@@ -177,6 +179,41 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                 }) { Text(stringResource(if (viewModel.isOwner) R.string.alarm_delete else R.string.alarm_leave)) }
             },
             dismissButton = { TextButton(onClick = { confirmRemove = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
+
+    // Choix des membres parmi mes contacts : rien n'est envoyé ici, l'ajout se fait au Save
+    if (viewModel.showMemberPicker) {
+        AlertDialog(
+            onDismissRequest = viewModel::closeMemberPicker,
+            title = { Text(stringResource(R.string.alarm_add_member)) },
+            text = {
+                if (viewModel.friends.isEmpty()) {
+                    Text(stringResource(R.string.alarm_members_no_contacts))
+                } else {
+                    Column(Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState())) {
+                        viewModel.friends.forEach { friend ->
+                            val saved = viewModel.isSavedMember(friend.uid)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(enabled = !saved) { viewModel.toggleMember(friend.uid) },
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(
+                                    checked = friend.uid in viewModel.members,
+                                    onCheckedChange = { viewModel.toggleMember(friend.uid) },
+                                    enabled = !saved,
+                                )
+                                Text(friend.displayName, Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::closeMemberPicker) { Text(stringResource(R.string.alarm_members_done)) }
+            },
         )
     }
 }

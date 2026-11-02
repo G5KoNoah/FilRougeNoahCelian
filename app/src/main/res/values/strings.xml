@@ -92,6 +92,8 @@
     <string name="alarm_vibrations">Vibrations</string>
     <string name="alarm_members">Members</string>
     <string name="alarm_add_member">Add a member</string>
+    <string name="alarm_members_no_contacts">You don\'t have any contacts yet. Add some from the Contacts tab.</string>
+    <string name="alarm_members_done">Done</string>
     <string name="alarm_save">Save</string>
     <string name="alarm_delete">Delete</string>
     <string name="alarm_leave">Leave</string>

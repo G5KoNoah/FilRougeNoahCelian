@@ -10,6 +10,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
+import ca.uqac.mobile.projetfilrouge.data.Friend
+import ca.uqac.mobile.projetfilrouge.data.FriendRepository
 import ca.uqac.mobile.projetfilrouge.data.PollRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.data.currentUid
@@ -83,7 +85,15 @@ class AlarmEditViewModel(
     var pollDuration by mutableStateOf<String?>(null)
         private set
 
+    // Mes contacts : ce sont les seules personnes qu'on peut ajouter à l'alarme
+    var friends by mutableStateOf<List<Friend>>(emptyList())
+        private set
+
+    var showMemberPicker by mutableStateOf(false)
+        private set
+
     init {
+        loadFriends()
         if (alarmId != null) {
             viewModelScope.launch {
                 try {
@@ -148,6 +158,34 @@ class AlarmEditViewModel(
         pollDuration = value
     }
 
+    private fun loadFriends() {
+        val me = myUid ?: return
+        viewModelScope.launch {
+            try {
+                friends = FriendRepository.getFriends(FriendRepository.observeFriendUids(me).first())
+            } catch (e: Exception) {
+                error = e.localizedMessage ?: str(R.string.error_server)
+            }
+        }
+    }
+
+    fun openMemberPicker() {
+        showMemberPicker = true
+    }
+
+    fun closeMemberPicker() {
+        showMemberPicker = false
+    }
+
+    // Les membres déjà enregistrés ne se retirent pas ici (c'est "Quitter" / "Supprimer") :
+    // on ne coche / décoche que les nouveaux, qui seront ajoutés au Save
+    fun isSavedMember(uid: String): Boolean = uid == ownerId || uid in original?.members.orEmpty()
+
+    fun toggleMember(uid: String) {
+        if (isSavedMember(uid)) return
+        members = if (uid in members) members - uid else members + uid
+    }
+
     fun save(onDone: () -> Unit) {
         val me = myUid ?: return
         launchSaving(str(R.string.alarm_error_save)) {
@@ -162,8 +200,15 @@ class AlarmEditViewModel(
                 snooze = if (needsVote && o != null) o.snooze else snooze,
                 sound = sound,
                 vibrations = vibrations,
+                members = members,
             )
-            if (alarmId == null) AlarmRepository.createAlarm(me, alarm) else AlarmRepository.updateSettings(alarm)
+            if (alarmId == null) {
+                AlarmRepository.createAlarm(me, alarm)
+            } else {
+                AlarmRepository.updateSettings(alarm)
+                val nouveaux = members - original?.members.orEmpty().toSet()
+                for (uid in nouveaux) AlarmRepository.addMember(alarmId, uid)
+            }
             onDone()
         }
     }

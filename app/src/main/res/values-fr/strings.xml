@@ -94,6 +94,8 @@
     <string name="alarm_vibrations">Vibrations</string>
     <string name="alarm_members">Membres</string>
     <string name="alarm_add_member">Ajouter un membre</string>
+    <string name="alarm_members_no_contacts">Tu n\'as pas encore de contacts. Ajoute-en depuis l\'onglet Contacts.</string>
+    <string name="alarm_members_done">Terminé</string>
     <string name="alarm_save">Enregistrer</string>
     <string name="alarm_delete">Supprimer</string>
     <string name="alarm_leave">Quitter</string>
