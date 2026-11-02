@@ -81,11 +81,6 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentIntent(openAppIntent)
             .setDeleteIntent(dismissIntent)
             .setAutoCancel(true)
-            .apply {
-                // Android 7 et moins : pas de canaux, le son se règle sur la notification
-                // (ignoré à partir d'Android 8, où c'est le canal qui décide)
-                if (sound) setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)) else setSilent(true)
-            }
             .build()
 
         // Le son boucle jusqu'à ce que l'utilisateur touche la notification
