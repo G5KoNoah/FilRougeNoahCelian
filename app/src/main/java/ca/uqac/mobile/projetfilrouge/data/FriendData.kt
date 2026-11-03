@@ -5,6 +5,7 @@ data class Friend(
     val email: String,
     val firstName: String,
     val lastName: String,
+    val avatarUrl: String? = null,
 ) {
     val displayName: String get() = "$firstName $lastName".trim().ifEmpty { email }
 }
