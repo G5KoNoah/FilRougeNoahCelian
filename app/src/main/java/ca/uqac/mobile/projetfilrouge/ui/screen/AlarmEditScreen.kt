@@ -7,7 +7,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,6 +39,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -78,14 +82,22 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
         viewModel.error?.let {
             Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
+        // Les sections se répartissent sur toute la hauteur disponible ; sur un petit écran, on défile
+        BoxWithConstraints(
+            Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) {
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight),
+            verticalArrangement = spreadVertically(min = 16.dp, max = 80.dp),
         ) {
-            AppCard {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Heure et jours
+            AppCard(contentPadding = PaddingValues(20.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     TimeSelector(
                         hour = viewModel.hour,
                         minute = viewModel.minute,
@@ -93,9 +105,20 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                         onMinuteChange = viewModel::onMinuteChange,
                     )
                     DaysRow(selected = viewModel.days, onToggle = viewModel::toggleDay)
+                }
+            }
+
+            // Nom, sonnerie, rappel
+            AppCard(contentPadding = PaddingValues(20.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     PillTextField(value = viewModel.name, onValueChange = { viewModel.onNameChange(it) }, placeholder = stringResource(R.string.alarm_name))
                     PillDropdown(viewModel.ringtone ?: stringResource(R.string.alarm_ringtone), viewModel.ringtones, onSelect = { viewModel.onRingtoneSelected(it) })
-                    PillDropdown(viewModel.snooze, viewModel.snoozeOptions, onSelect = { viewModel.onSnoozeSelected(it) })
+                }
+            }
+
+            // Vote
+            AppCard(contentPadding = PaddingValues(20.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -128,13 +151,17 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                 }
             }
 
-            SwitchRow(stringResource(R.string.alarm_sound), checked = viewModel.sound, onCheckedChange = viewModel::onSoundChange)
-            SwitchRow(stringResource(R.string.alarm_vibrations), checked = viewModel.vibrations, onCheckedChange = viewModel::onVibrationsChange)
+            // Son et vibrations
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SwitchRow(stringResource(R.string.alarm_sound), checked = viewModel.sound, onCheckedChange = viewModel::onSoundChange)
+                SwitchRow(stringResource(R.string.alarm_vibrations), checked = viewModel.vibrations, onCheckedChange = viewModel::onVibrationsChange)
+            }
 
-            AppCard {
+            // Membres
+            AppCard(contentPadding = PaddingValues(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.alarm_members), style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.alarm_members), style = MaterialTheme.typography.titleSmall)
                         MemberAvatars(viewModel.members.size.coerceAtMost(6))
                     }
                     IconButton(onClick = viewModel::openMemberPicker) {
@@ -143,21 +170,23 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                 }
             }
         }
+        }
 
         Spacer(Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SecondaryButton(stringResource(R.string.cancel), onClick = onBackScreen)
+            SecondaryButton(stringResource(R.string.cancel), modifier = Modifier.weight(1f), onClick = onBackScreen)
             if (!viewModel.isNew) {
                 SecondaryButton(
                     stringResource(if (viewModel.isOwner) R.string.alarm_delete else R.string.alarm_leave),
+                    modifier = Modifier.weight(1f),
                     contentColor = MaterialTheme.colorScheme.error,
                     onClick = { confirmRemove = true },
                 )
             }
-            PrimaryButton(stringResource(R.string.alarm_save), enabled = !viewModel.isSaving, onClick = { viewModel.save(onDone = onBackScreen) })
+            PrimaryButton(stringResource(R.string.alarm_save), modifier = Modifier.weight(1f), enabled = !viewModel.isSaving, onClick = { viewModel.save(onDone = onBackScreen) })
         }
         Spacer(Modifier.height(16.dp))
     }
@@ -231,12 +260,12 @@ private fun TimeSelector(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NumberWheel(count = 24, initial = hour, onValueChange = onHourChange)
-        Text(":", fontSize = 32.sp, modifier = Modifier.padding(horizontal = 8.dp))
+        Text(":", fontSize = 48.sp, modifier = Modifier.padding(horizontal = 12.dp))
         NumberWheel(count = 60, initial = minute, onValueChange = onMinuteChange)
     }
 }
 
-private val WheelItemHeight = 44.dp
+private val WheelItemHeight = 68.dp
 private const val WheelLoops = 1000
 
 @Composable
@@ -265,14 +294,14 @@ private fun NumberWheel(count: Int, initial: Int, onValueChange: (Int) -> Unit) 
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .height(WheelItemHeight * 3)
-            .width(64.dp),
+            .width(104.dp),
     ) {
         items(count * WheelLoops) { index ->
             val isCenter = index == centerIndex
             Box(Modifier.height(WheelItemHeight), contentAlignment = Alignment.Center) {
                 Text(
                     "%02d".format(index % count),
-                    fontSize = if (isCenter) 32.sp else 22.sp,
+                    fontSize = if (isCenter) 48.sp else 28.sp,
                     color = if (isCenter) MaterialTheme.colorScheme.onSurface
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -289,13 +318,13 @@ private fun DaysRow(selected: Set<Int>, onToggle: (Int) -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.background)
-            .padding(4.dp),
+            .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         days.forEachIndexed { index, letter ->
             Box(
                 modifier = Modifier
-                    .size(28.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
                     .background(
                         if (index in selected) MaterialTheme.colorScheme.primary
@@ -306,11 +335,29 @@ private fun DaysRow(selected: Set<Int>, onToggle: (Int) -> Unit) {
             ) {
                 Text(
                     letter,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = if (index in selected) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.onSurface,
                 )
             }
+        }
+    }
+}
+
+// Comme SpaceBetween, mais l'écart entre deux éléments reste entre min et max.
+// S'il reste de la place, le bloc est centré verticalement ; s'il en manque, on garde l'écart min (et l'écran défile).
+private fun spreadVertically(min: Dp, max: Dp) = object : Arrangement.Vertical {
+    override val spacing = min
+
+    override fun Density.arrange(totalSize: Int, sizes: IntArray, outPositions: IntArray) {
+        val gaps = (sizes.size - 1).coerceAtLeast(1)
+        val free = totalSize - sizes.sum()
+        val gap = (free / gaps).coerceIn(min.roundToPx(), max.roundToPx())
+        val used = sizes.sum() + gap * (sizes.size - 1)
+        var y = ((totalSize - used) / 2).coerceAtLeast(0)
+        sizes.forEachIndexed { index, size ->
+            outPositions[index] = y
+            y += size + gap
         }
     }
 }

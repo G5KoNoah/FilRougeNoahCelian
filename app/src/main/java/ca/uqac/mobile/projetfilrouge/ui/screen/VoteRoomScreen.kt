@@ -161,16 +161,18 @@ private fun VoteRoomContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             SecondaryButton(
                 stringResource(R.string.vote_against),
+                modifier = Modifier.weight(1f),
                 contentColor = VoteAgainst,
                 enabled = !isVoting,
                 onClick = { onVote(selected.id, false) },
             )
             PrimaryButton(
                 stringResource(R.string.vote_for),
+                modifier = Modifier.weight(1f),
                 contentColor = VoteFor,
                 enabled = !isVoting,
                 onClick = { onVote(selected.id, true) },

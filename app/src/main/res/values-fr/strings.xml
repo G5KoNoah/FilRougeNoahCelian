@@ -43,13 +43,19 @@
     <string name="account_not_found">Profil introuvable</string>
 
     <!-- Liste des alarmes -->
-    <string name="alarms_none_scheduled">Aucune alarme\nprévue</string>
+    <string name="alarms_next">Prochaine alarme</string>
+    <string name="alarms_none_scheduled">Aucune alarme prévue</string>
+    <string name="alarms_all_disabled">Toutes tes alarmes sont désactivées.</string>
+    <string name="alarms_list_title">Mes alarmes</string>
+    <string name="alarms_today">Aujourd\'hui</string>
+    <string name="alarms_tomorrow">Demain</string>
     <string name="alarms_add">Ajouter une alarme</string>
     <string name="alarms_empty">Aucune alarme pour l\'instant. Touche + pour en créer une.</string>
     <string name="alarms_every_day">Tous les jours</string>
     <string name="alarms_weekdays">En semaine</string>
     <string name="alarms_weekends">Le week-end</string>
-    <string name="alarms_in">Alarme dans %1$s\net %2$s</string>
+    <string name="alarms_in_one">dans %1$s</string>
+    <string name="alarms_in_two">dans %1$s et %2$s</string>
     <plurals name="duration_days">
         <item quantity="one">%d jour</item>
         <item quantity="many">%d jours</item>
@@ -74,6 +80,15 @@
         <item>jeu.</item>
         <item>ven.</item>
         <item>sam.</item>
+    </string-array>
+    <string-array name="day_names">
+        <item>Dimanche</item>
+        <item>Lundi</item>
+        <item>Mardi</item>
+        <item>Mercredi</item>
+        <item>Jeudi</item>
+        <item>Vendredi</item>
+        <item>Samedi</item>
     </string-array>
     <string-array name="day_letters">
         <item>D</item>

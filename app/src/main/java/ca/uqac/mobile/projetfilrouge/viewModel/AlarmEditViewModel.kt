@@ -34,7 +34,6 @@ class AlarmEditViewModel(
     // (état Compose : needsVote et canStartPoll se mettent à jour à l'écran quand l'alarme est chargée)
     private var original by mutableStateOf<SharedAlarm?>(null)
     val ringtones = listOf("Classique", "Radar", "Carillon", "Réveil doux")
-    val snoozeOptions = listOf("1 x 5 min", "2 x 3 min", "3 x 5 min")
     val pollDurations = listOf("2 min", "5 min", "10 min")
 
     val alarmId: String? = savedStateHandle.get<String>("alarmId")
@@ -68,9 +67,6 @@ class AlarmEditViewModel(
         private set
 
     var ringtone by mutableStateOf<String?>(null)
-        private set
-
-    var snooze by mutableStateOf("2 x 3 min")
         private set
 
     var sound by mutableStateOf(true)
@@ -115,7 +111,6 @@ class AlarmEditViewModel(
         days = alarm.days.toSet()
         name = alarm.name
         ringtone = alarm.ringtone.ifBlank { null }
-        snooze = alarm.snooze.ifBlank { "2 x 3 min" }
         sound = alarm.sound
         vibrations = alarm.vibrations
         members = alarm.members
@@ -140,10 +135,6 @@ class AlarmEditViewModel(
 
     fun onRingtoneSelected(value: String) {
         ringtone = value
-    }
-
-    fun onSnoozeSelected(value: String) {
-        snooze = value
     }
 
     fun onSoundChange(value: Boolean) {
@@ -197,7 +188,6 @@ class AlarmEditViewModel(
                 minute = if (needsVote && o != null) o.minute else minute,
                 days = if (needsVote && o != null) o.days else days.sorted(),
                 ringtone = if (needsVote && o != null) o.ringtone else ringtone.orEmpty(),
-                snooze = if (needsVote && o != null) o.snooze else snooze,
                 sound = sound,
                 vibrations = vibrations,
                 members = members,
@@ -251,8 +241,6 @@ class AlarmEditViewModel(
                 JsonArray(days.sorted().map { JsonPrimitive(it) })
             )
             if (ringtone.orEmpty() != o.ringtone) put("ringtone", ringtone.orEmpty())
-            // fill() remplace un snooze vide par "2 x 3 min" : on compare avec la même valeur
-            if (snooze != o.snooze.ifBlank { DEFAULT_SNOOZE }) put("snooze", snooze)
         }
     }
 
@@ -269,7 +257,4 @@ class AlarmEditViewModel(
         }
     }
 
-    private companion object {
-        const val DEFAULT_SNOOZE = "2 x 3 min"
-    }
 }

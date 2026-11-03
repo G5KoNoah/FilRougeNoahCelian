@@ -44,13 +44,19 @@
     <string name="account_not_found">Profile not found</string>
 
     <!-- Alarms list -->
-    <string name="alarms_none_scheduled">No alarm\nscheduled</string>
+    <string name="alarms_next">Next alarm</string>
+    <string name="alarms_none_scheduled">No alarm scheduled</string>
+    <string name="alarms_all_disabled">All your alarms are turned off.</string>
+    <string name="alarms_list_title">My alarms</string>
+    <string name="alarms_today">Today</string>
+    <string name="alarms_tomorrow">Tomorrow</string>
     <string name="alarms_add">Add an alarm</string>
     <string name="alarms_empty">No alarms yet. Tap + to create one.</string>
     <string name="alarms_every_day">Every day</string>
     <string name="alarms_weekdays">Weekdays</string>
     <string name="alarms_weekends">Weekends</string>
-    <string name="alarms_in">Alarm in %1$s\nand %2$s</string>
+    <string name="alarms_in_one">in %1$s</string>
+    <string name="alarms_in_two">in %1$s and %2$s</string>
     <plurals name="duration_days">
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>
@@ -72,6 +78,15 @@
         <item>Thu</item>
         <item>Fri</item>
         <item>Sat</item>
+    </string-array>
+    <string-array name="day_names">
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
     </string-array>
     <string-array name="day_letters">
         <item>S</item>
