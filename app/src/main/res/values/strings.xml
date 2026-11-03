@@ -88,7 +88,8 @@
 
     <!-- Alarm edit -->
     <string name="alarm_name">Alarm name</string>
-    <string name="alarm_ringtone">Ringtone</string>
+    <string name="ringtone_default">Default alarm</string>
+    <string name="ringtone_remove">Remove this sound</string>
     <string name="alarm_poll_duration">Poll duration</string>
     <string name="alarm_start_poll">Start poll</string>
     <string name="alarm_sound">Sound</string>
@@ -117,6 +118,12 @@
     <string name="notification_channel_alarm">Alarm</string>
     <string name="notification_alarm_title">Alarm</string>
     <string name="notification_alarm_text">It\'s time!</string>
+    <string name="notification_alarm_stop">Stop</string>
+    <string name="ringtone_upload">Upload a sound (MP3 / WAV)</string>
+    <string name="ringtone_custom">Custom sound</string>
+    <string name="ringtone_error_format">Only MP3 and WAV files are supported</string>
+    <string name="ringtone_error_size">The file is too large (5 MB max)</string>
+    <string name="ringtone_error_upload">Couldn\'t upload the sound</string>
 
     <!-- Contacts -->
     <string name="contacts_title">Contacts</string>

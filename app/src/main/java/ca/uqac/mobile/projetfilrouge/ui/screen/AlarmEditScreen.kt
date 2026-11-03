@@ -63,12 +63,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.filter
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.outlined.UploadFile
+import ca.uqac.mobile.projetfilrouge.data.RingtoneRepository
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 
 
 @Composable
 fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = {}) {
     val viewModel : AlarmEditViewModel = viewModel()
     var confirmRemove by remember { mutableStateOf(false) }
+    val pickRingtone = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) viewModel.uploadRingtone(uri)
+    }
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
         if (viewModel.isLoading) {
@@ -94,7 +105,23 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                     )
                     DaysRow(selected = viewModel.days, onToggle = viewModel::toggleDay)
                     PillTextField(value = viewModel.name, onValueChange = { viewModel.onNameChange(it) }, placeholder = stringResource(R.string.alarm_name))
-                    PillDropdown(viewModel.ringtone ?: stringResource(R.string.alarm_ringtone), viewModel.ringtones, onSelect = { viewModel.onRingtoneSelected(it) })
+                    RingtonePill(
+                        name = viewModel.ringtone.takeIf { viewModel.ringtoneUrl != null },
+                        onClear = viewModel::clearRingtone,
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(
+                            onClick = { pickRingtone.launch(RingtoneRepository.acceptedMimeTypes) },
+                            enabled = !viewModel.isUploadingRingtone,
+                        ) {
+                            Icon(Icons.Outlined.UploadFile, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.ringtone_upload))
+                        }
+                        if (viewModel.isUploadingRingtone) {
+                            CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                        }
+                    }
                     PillDropdown(viewModel.snooze, viewModel.snoozeOptions, onSelect = { viewModel.onSnoozeSelected(it) })
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -309,6 +336,45 @@ private fun DaysRow(selected: Set<Int>, onToggle: (Int) -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = if (index in selected) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RingtonePill(name: String?, onClear: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 40.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (name == null) {
+            Text(
+                stringResource(R.string.ringtone_default),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+        } else {
+            Icon(Icons.Outlined.MusicNote, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(
+                name,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            IconButton(onClick = onClear, modifier = Modifier.size(32.dp)) {
+                Icon(
+                    Icons.Outlined.Close,
+                    contentDescription = stringResource(R.string.ringtone_remove),
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }

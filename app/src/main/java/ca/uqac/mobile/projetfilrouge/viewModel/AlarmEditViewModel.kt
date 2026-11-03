@@ -22,6 +22,11 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import android.net.Uri
+import android.provider.OpenableColumns
+import ca.uqac.mobile.projetfilrouge.data.RingtoneRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class AlarmEditViewModel(
     application: Application,
@@ -33,7 +38,6 @@ class AlarmEditViewModel(
     // l'alarme telle qu'elle était à l'ouverture de l'écran
     // (état Compose : needsVote et canStartPoll se mettent à jour à l'écran quand l'alarme est chargée)
     private var original by mutableStateOf<SharedAlarm?>(null)
-    val ringtones = listOf("Classique", "Radar", "Carillon", "Réveil doux")
     val snoozeOptions = listOf("1 x 5 min", "2 x 3 min", "3 x 5 min")
     val pollDurations = listOf("2 min", "5 min", "10 min")
 
@@ -68,6 +72,12 @@ class AlarmEditViewModel(
         private set
 
     var ringtone by mutableStateOf<String?>(null)
+        private set
+
+    var ringtoneUrl by mutableStateOf<String?>(null)
+        private set
+
+    var isUploadingRingtone by mutableStateOf(false)
         private set
 
     var snooze by mutableStateOf("2 x 3 min")
@@ -114,7 +124,8 @@ class AlarmEditViewModel(
         minute = alarm.minute
         days = alarm.days.toSet()
         name = alarm.name
-        ringtone = alarm.ringtone.ifBlank { null }
+        ringtone = savedRingtone(alarm).ifBlank { null }
+        ringtoneUrl = alarm.ringtoneUrl
         snooze = alarm.snooze.ifBlank { "2 x 3 min" }
         sound = alarm.sound
         vibrations = alarm.vibrations
@@ -138,9 +149,48 @@ class AlarmEditViewModel(
         name = value
     }
 
-    fun onRingtoneSelected(value: String) {
-        ringtone = value
+    fun clearRingtone() {
+        ringtone = null
+        ringtoneUrl = null
     }
+
+    private fun savedRingtone(alarm: SharedAlarm): String =
+        if (alarm.ringtoneUrl == null) "" else alarm.ringtone
+
+    fun uploadRingtone(uri: Uri) {
+        val me = myUid ?: return
+        if (isUploadingRingtone) return
+        isUploadingRingtone = true
+        error = null
+        viewModelScope.launch {
+            try {
+                val resolver = getApplication<Application>().contentResolver
+                val mimeType = resolver.getType(uri)
+                if (RingtoneRepository.extensionFor(mimeType) == null) {
+                    error = str(R.string.ringtone_error_format)
+                    return@launch
+                }
+                val bytes = withContext(Dispatchers.IO) {
+                    resolver.openInputStream(uri)?.use { it.readBytes() }
+                } ?: error(str(R.string.ringtone_error_upload))
+                if (bytes.size > RingtoneRepository.MAX_SIZE_BYTES) {
+                    error = str(R.string.ringtone_error_size)
+                    return@launch
+                }
+                ringtoneUrl = RingtoneRepository.upload(me, bytes, mimeType!!)
+                ringtone = displayName(uri) ?: str(R.string.ringtone_custom)
+            } catch (e: Exception) {
+                error = e.localizedMessage ?: str(R.string.ringtone_error_upload)
+            } finally {
+                isUploadingRingtone = false
+            }
+        }
+    }
+
+    private fun displayName(uri: Uri): String? =
+        getApplication<Application>().contentResolver
+            .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+            ?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
 
     fun onSnoozeSelected(value: String) {
         snooze = value
@@ -197,6 +247,7 @@ class AlarmEditViewModel(
                 minute = if (needsVote && o != null) o.minute else minute,
                 days = if (needsVote && o != null) o.days else days.sorted(),
                 ringtone = if (needsVote && o != null) o.ringtone else ringtone.orEmpty(),
+                ringtoneUrl = if (needsVote && o != null) o.ringtoneUrl else ringtoneUrl,
                 snooze = if (needsVote && o != null) o.snooze else snooze,
                 sound = sound,
                 vibrations = vibrations,
@@ -250,7 +301,10 @@ class AlarmEditViewModel(
             if (days.sorted() != o.days.sorted()) put("days",
                 JsonArray(days.sorted().map { JsonPrimitive(it) })
             )
-            if (ringtone.orEmpty() != o.ringtone) put("ringtone", ringtone.orEmpty())
+            if (ringtone.orEmpty() != savedRingtone(o) || ringtoneUrl != o.ringtoneUrl) {
+                put("ringtone", ringtone.orEmpty())
+                put("ringtone_url", ringtoneUrl)
+            }
             // fill() remplace un snooze vide par "2 x 3 min" : on compare avec la même valeur
             if (snooze != o.snooze.ifBlank { DEFAULT_SNOOZE }) put("snooze", snooze)
         }

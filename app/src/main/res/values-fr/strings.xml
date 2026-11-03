@@ -90,7 +90,8 @@
 
     <!-- Modifier une alarme -->
     <string name="alarm_name">Nom de l\'alarme</string>
-    <string name="alarm_ringtone">Sonnerie</string>
+    <string name="ringtone_default">Alarme par défaut</string>
+    <string name="ringtone_remove">Retirer ce son</string>
     <string name="alarm_poll_duration">Durée du vote</string>
     <string name="alarm_start_poll">Lancer le vote</string>
     <string name="alarm_sound">Son</string>
@@ -119,6 +120,12 @@
     <string name="notification_channel_alarm">Alarme</string>
     <string name="notification_alarm_title">Alarme</string>
     <string name="notification_alarm_text">C\'est l\'heure !</string>
+    <string name="notification_alarm_stop">Arrêter</string>
+    <string name="ringtone_upload">Importer un son (MP3 / WAV)</string>
+    <string name="ringtone_custom">Son personnalisé</string>
+    <string name="ringtone_error_format">Seuls les fichiers MP3 et WAV sont acceptés</string>
+    <string name="ringtone_error_size">Le fichier est trop lourd (5 Mo max)</string>
+    <string name="ringtone_error_upload">Impossible d\'envoyer le son</string>
 
     <!-- Contacts -->
     <string name="contacts_title">Contacts</string>

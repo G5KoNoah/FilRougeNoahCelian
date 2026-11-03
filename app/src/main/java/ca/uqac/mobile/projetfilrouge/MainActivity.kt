@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
     private fun stopVibrationIfFromAlarm(intent: Intent?) {
         if (intent?.getBooleanExtra(AlarmReceiver.EXTRA_STOP_VIBRATION, false) == true) {
             AppVibrator(this).stop()
+            AlarmSoundService.stop(this)
             intent.removeExtra(AlarmReceiver.EXTRA_STOP_VIBRATION)   // évite de rejouer ça après une rotation
         }
     }

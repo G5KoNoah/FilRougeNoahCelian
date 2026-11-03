@@ -12,6 +12,7 @@ data class SharedAlarm(
     val minute: Int = 0,
     val days: List<Int> = emptyList(),
     val ringtone: String = "",
+    @SerialName("ringtone_url") val ringtoneUrl: String? = null,
     val snooze: String = "",
     val sound: Boolean = true,
     val vibrations: Boolean = true,

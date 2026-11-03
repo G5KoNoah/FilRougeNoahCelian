@@ -2,6 +2,7 @@ package ca.uqac.mobile.projetfilrouge
 
 import android.content.Context
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
+import ca.uqac.mobile.projetfilrouge.data.RingtoneRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.data.uidChanges
 import kotlinx.coroutines.CoroutineScope
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
-class AlarmSync(context: Context) {
+class AlarmSync(private val context: Context) {
 
     private val scheduler = AlarmScheduler(context)
     private val prefs = context.getSharedPreferences("scheduled_alarms", Context.MODE_PRIVATE)
@@ -33,8 +34,17 @@ class AlarmSync(context: Context) {
                             .catch { }
                     }
                 }
-                .collect { apply(it) }
+                .collect { alarms ->
+                    apply(alarms)
+                    cacheRingtones(alarms)
+                }
         }
+    }
+
+    private suspend fun cacheRingtones(alarms: List<SharedAlarm>) {
+        val urls = alarms.mapNotNull { it.ringtoneUrl }.distinct()
+        urls.forEach { url -> runCatching { RingtoneRepository.download(context, url) } }
+        RingtoneRepository.keepOnly(context, urls)
     }
 
     fun rescheduleSaved() {

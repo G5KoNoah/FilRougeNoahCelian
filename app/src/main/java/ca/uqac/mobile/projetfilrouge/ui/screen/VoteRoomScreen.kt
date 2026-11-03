@@ -228,7 +228,7 @@ private fun daysText(days: List<Int>): String {
 private fun tabLabel(poll: AlarmPoll): String = when {
     poll.changesTime -> poll.newTime()
     "days" in poll.changes -> daysText(poll.changes.intList("days").orEmpty())
-    "ringtone" in poll.changes -> poll.changes.text("ringtone").orEmpty()
+    "ringtone" in poll.changes -> poll.changes.text("ringtone").orEmpty().ifBlank { stringResource(R.string.ringtone_default) }
     else -> poll.changes.text("snooze").orEmpty()
 }
 
@@ -246,7 +246,11 @@ private fun changeLines(poll: AlarmPoll): List<String> = buildList {
     if ("ringtone" in poll.changes) add(
         stringResource(
             R.string.vote_ringtone,
-            stringResource(R.string.vote_change, poll.previous.text("ringtone").orEmpty(), poll.changes.text("ringtone").orEmpty()),
+            stringResource(
+                R.string.vote_change,
+                poll.previous.text("ringtone").orEmpty().ifBlank { stringResource(R.string.ringtone_default) },
+                poll.changes.text("ringtone").orEmpty().ifBlank { stringResource(R.string.ringtone_default) },
+            ),
         )
     )
     if ("snooze" in poll.changes) add(

@@ -47,6 +47,7 @@ object AlarmRepository {
             set("minute", alarm.minute)
             set("days", alarm.days)
             set("ringtone", alarm.ringtone)
+            set("ringtone_url", alarm.ringtoneUrl)
             set("snooze", alarm.snooze)
             set("sound", alarm.sound)
             set("vibrations", alarm.vibrations)
