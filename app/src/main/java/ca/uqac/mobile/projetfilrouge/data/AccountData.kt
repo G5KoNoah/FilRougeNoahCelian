@@ -9,4 +9,5 @@ data class AccountData (
     @SerialName("first_name") val firstName: String = "",
     @SerialName("last_name") val lastName: String = "",
     val id: String = "",
+    @SerialName("avatar_url") val avatarUrl: String? = null,
 )

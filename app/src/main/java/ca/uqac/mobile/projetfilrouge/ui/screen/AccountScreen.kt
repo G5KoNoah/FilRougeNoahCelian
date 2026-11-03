@@ -42,12 +42,29 @@ import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
 import ca.uqac.mobile.projetfilrouge.data.supabase
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 
 @Composable
 fun AccountScreen(onLogout: () -> Unit) {
     val accountViewModel: AccountDetailsViewModel = viewModel()
     val account by accountViewModel.account.collectAsStateWithLifecycle()
     val error by accountViewModel.error.collectAsStateWithLifecycle()
+    val isUploadingAvatar by accountViewModel.isUploadingAvatar.collectAsStateWithLifecycle()
+    val pickPhoto = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) accountViewModel.uploadAvatar(uri)
+    }
 
     Scaffold(modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
@@ -59,7 +76,14 @@ fun AccountScreen(onLogout: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             error?.let { Text(it, color = Color.Red, fontWeight = FontWeight.Bold) }
-            MainInfo(account = account, uid = accountViewModel.uid)
+            MainInfo(
+                account = account,
+                uid = accountViewModel.uid,
+                isUploadingAvatar = isUploadingAvatar,
+                onChangeAvatar = {
+                    pickPhoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+            )
             OtherInfo(account = account)
             SettingsInfo(onLogout = onLogout)
         }
@@ -77,15 +101,21 @@ fun Modifier.cardStyle(): Modifier {
 }
 
 @Composable
-fun MainInfo(account: AccountData?, uid: String?, modifier: Modifier = Modifier) {
+fun MainInfo(
+    account: AccountData?,
+    uid: String?,
+    isUploadingAvatar: Boolean,
+    onChangeAvatar: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier.cardStyle(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.uqac_logo),
-            contentDescription = stringResource(R.string.logo_uqac),
-            modifier = Modifier.size(120.dp)
+        Avatar(
+            avatarUrl = account?.avatarUrl,
+            isUploading = isUploadingAvatar,
+            onClick = onChangeAvatar,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -94,6 +124,52 @@ fun MainInfo(account: AccountData?, uid: String?, modifier: Modifier = Modifier)
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(uid ?: "", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+    }
+}
+
+@Composable
+private fun Avatar(avatarUrl: String?, isUploading: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .clickable(
+                enabled = !isUploading,
+                onClickLabel = stringResource(R.string.avatar_change),
+                onClick = onClick,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (avatarUrl == null) {
+            Image(
+                painter = painterResource(id = R.drawable.uqac_logo),
+                contentDescription = stringResource(R.string.logo_uqac),
+                modifier = Modifier.matchParentSize(),
+            )
+        } else {
+            AsyncImage(
+                model = avatarUrl,
+                contentDescription = stringResource(R.string.avatar_description),
+                contentScale = ContentScale.Crop,
+                error = painterResource(id = R.drawable.uqac_logo),
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(CircleShape),
+            )
+        }
+        if (isUploading) {
+            CircularProgressIndicator()
+        }
+        Icon(
+            Icons.Outlined.PhotoCamera,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(6.dp),
+        )
     }
 }
 

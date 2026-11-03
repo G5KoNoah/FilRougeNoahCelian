@@ -11,6 +11,7 @@ import io.github.jan.supabase.realtime.Realtime
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
+import io.github.jan.supabase.storage.Storage
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +32,7 @@ val supabase = createSupabaseClient(
     install(Auth)
     install(Postgrest)
     install(Realtime)
+    install(Storage)
 }
 
 val currentUid: String? get() = supabase.auth.currentUserOrNull()?.id
