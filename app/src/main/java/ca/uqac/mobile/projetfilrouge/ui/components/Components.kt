@@ -55,6 +55,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ca.uqac.mobile.projetfilrouge.AppVibrator
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
+import coil3.compose.AsyncImage
 
 val CardShape = RoundedCornerShape(12.dp)
 private val PillShape = RoundedCornerShape(8.dp)
@@ -223,12 +226,28 @@ fun SwitchRow(
 
 @Composable
 fun MemberAvatars(count: Int, modifier: Modifier = Modifier) {
+    MemberAvatars(List(count) { null }, modifier)
+}
+
+@Composable
+fun MemberAvatars(avatarUrls: List<String?>, modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-        repeat(count) {
-            Icon(
-                Icons.Outlined.AccountCircle,
+        avatarUrls.forEach { MemberAvatar(it) }
+    }
+}
+
+@Composable
+fun MemberAvatar(avatarUrl: String?, modifier: Modifier = Modifier, size: Dp = 24.dp) {
+    Box(modifier.size(size), contentAlignment = Alignment.Center) {
+        Icon(Icons.Outlined.AccountCircle, contentDescription = null, modifier = Modifier.matchParentSize())
+        if (avatarUrl != null) {
+            AsyncImage(
+                model = avatarUrl,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(CircleShape),
             )
         }
     }

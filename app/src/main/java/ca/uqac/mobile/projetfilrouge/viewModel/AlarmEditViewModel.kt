@@ -102,8 +102,11 @@ class AlarmEditViewModel(
     var showMemberPicker by mutableStateOf(false)
         private set
 
+    private var memberProfiles by mutableStateOf<Map<String, Friend>>(emptyMap())
+
     init {
         loadFriends()
+        if (alarmId == null) loadMemberProfiles(members)
         if (alarmId != null) {
             viewModelScope.launch {
                 try {
@@ -131,7 +134,21 @@ class AlarmEditViewModel(
         vibrations = alarm.vibrations
         members = alarm.members
         original = alarm
+        loadMemberProfiles(alarm.members)
     }
+
+    private fun loadMemberProfiles(uids: List<String>) {
+        viewModelScope.launch {
+            try {
+                memberProfiles = memberProfiles + FriendRepository.getFriends(uids).associateBy { it.uid }
+            } catch (e: Exception) {
+                error = e.localizedMessage ?: str(R.string.error_server)
+            }
+        }
+    }
+
+    fun avatarOf(uid: String): String? =
+        (memberProfiles[uid] ?: friends.find { it.uid == uid })?.avatarUrl
 
     fun onHourChange(value: Int) {
         hour = value
