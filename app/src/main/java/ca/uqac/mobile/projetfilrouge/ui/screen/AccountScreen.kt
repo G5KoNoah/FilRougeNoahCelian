@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -71,7 +73,8 @@ fun AccountScreen(onLogout: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(vertical = 32.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -94,7 +97,7 @@ fun AccountScreen(onLogout: () -> Unit) {
 fun Modifier.cardStyle(): Modifier {
     val forme = RoundedCornerShape(16.dp)
     return this
-        .fillMaxWidth(0.75f)
+        .fillMaxWidth()
         .background(color = MaterialTheme.colorScheme.surface, shape = forme)
         .border(width = 2.dp, color = MaterialTheme.colorScheme.surfaceVariant, shape = forme)
         .padding(24.dp)

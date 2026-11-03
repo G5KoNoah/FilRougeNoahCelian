@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -47,9 +49,9 @@ import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.CardShape
 import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatars
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenLayout
-import ca.uqac.mobile.projetfilrouge.ui.components.ScreenTitle
 import ca.uqac.mobile.projetfilrouge.ui.components.SmallSwitch
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
+import java.util.Calendar
 import ca.uqac.mobile.projetfilrouge.viewModel.SharedAlarmsViewModel
 import kotlinx.coroutines.delay
 
@@ -96,18 +98,26 @@ private fun AlarmsContent(
             now = System.currentTimeMillis()
         }
     }
+    // L'alarme activée qui sonnera en premier, avec l'instant où elle sonnera
     val nextAlarm = alarms
         .filter { it.isEnabledFor(myUid) }
-        .minOfOrNull { AlarmScheduler.nextOccurrence(it.hour, it.minute, it.days, now) }
+        .map { it to AlarmScheduler.nextOccurrence(it.hour, it.minute, it.days, now) }
+        .minByOrNull { it.second }
 
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
-        ScreenTitle(
-            if (nextAlarm != null) untilText(nextAlarm, now) else stringResource(R.string.alarms_none_scheduled),
-            Modifier.fillMaxWidth(),
-        )
-        IconButton(onClick = onAdd, modifier = Modifier.align(Alignment.End)) {
-            Icon(Icons.Outlined.AddCircleOutline, contentDescription = stringResource(R.string.alarms_add))
+        NextAlarmCard(nextAlarm, hasAlarms = alarms.isNotEmpty(), nowMillis = now)
+        Spacer(Modifier.height(16.dp))
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.alarms_list_title),
+                modifier = Modifier.weight(1f).padding(start = 4.dp),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+            IconButton(onClick = onAdd) {
+                Icon(Icons.Outlined.AddCircleOutline, contentDescription = stringResource(R.string.alarms_add))
+            }
         }
         error?.let {
             Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -182,6 +192,83 @@ private fun daysLabel(days: List<Int>): String {
 }
 
 @Composable
+private fun NextAlarmCard(next: Pair<SharedAlarm, Long>?, hasAlarms: Boolean, nowMillis: Long) {
+    AppCard(contentPadding = PaddingValues(24.dp)) {
+        Text(
+            stringResource(R.string.alarms_next),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        if (next == null) {
+            Text(
+                stringResource(R.string.alarms_none_scheduled),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            // Sans alarme du tout, le message sous la carte invite déjà à en créer une
+            if (hasAlarms) {
+                Text(
+                    stringResource(R.string.alarms_all_disabled),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            return@AppCard
+        }
+        val (alarm, atMillis) = next
+        Row {
+            Text(
+                alarm.timeText,
+                modifier = Modifier.alignByBaseline(),
+                fontSize = 56.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                dayLabel(atMillis, nowMillis),
+                modifier = Modifier.alignByBaseline(),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            untilText(atMillis, nowMillis),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        if (alarm.name.isNotBlank()) {
+            Text(
+                alarm.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+// "Aujourd'hui", "Demain", sinon le nom du jour
+@Composable
+private fun dayLabel(targetMillis: Long, nowMillis: Long): String {
+    fun midnight(millis: Long) = Calendar.getInstance().apply {
+        timeInMillis = millis
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+    val target = midnight(targetMillis)
+    // Arrondi : un changement d'heure (été / hiver) donne une journée de 23 h ou 25 h
+    val dayDiff = Math.round((target.timeInMillis - midnight(nowMillis).timeInMillis) / 86_400_000.0)
+    return when (dayDiff) {
+        0L -> stringResource(R.string.alarms_today)
+        1L -> stringResource(R.string.alarms_tomorrow)
+        else -> stringArrayResource(R.array.day_names)[target.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY]
+    }
+}
+
+// "dans 2 heures et 5 minutes", "dans 3 jours et 1 heure", "dans 10 minutes" : on n'affiche pas les unités à 0
+@Composable
 private fun untilText(targetMillis: Long, nowMillis: Long): String {
     val totalMinutes = (targetMillis - nowMillis + 59_999) / 60_000
     val days = totalMinutes / (24 * 60)
@@ -190,10 +277,14 @@ private fun untilText(targetMillis: Long, nowMillis: Long): String {
     // pluralStringResource choisit "1 hour" / "2 hours" (ou "1 heure" / "2 heures") selon la langue
     @Composable
     fun plural(@PluralsRes id: Int, value: Long) = pluralStringResource(id, value.toInt(), value.toInt())
-    return if (days > 0) {
-        stringResource(R.string.alarms_in, plural(R.plurals.duration_days, days), plural(R.plurals.duration_hours, hours))
-    } else {
-        stringResource(R.string.alarms_in, plural(R.plurals.duration_hours, hours), plural(R.plurals.duration_minutes, minutes))
+    val parts = buildList {
+        if (days > 0) add(plural(R.plurals.duration_days, days))
+        if (hours > 0) add(plural(R.plurals.duration_hours, hours))
+        if (days == 0L && minutes > 0) add(plural(R.plurals.duration_minutes, minutes))
+    }
+    return when (parts.size) {
+        1 -> stringResource(R.string.alarms_in_one, parts[0])
+        else -> stringResource(R.string.alarms_in_two, parts[0], parts[1])
     }
 }
 

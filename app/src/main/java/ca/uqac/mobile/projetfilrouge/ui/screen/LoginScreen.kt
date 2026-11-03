@@ -5,7 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,13 +16,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccessAlarm
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -51,20 +56,35 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen (onSignUp:()-> Unit, onLogin: () -> Unit){
+    AuthLayout {
+        Logo(modifier = Modifier.heightIn(max = 160.dp), verticalArrangement = Arrangement.Center)
+        FormLogin(modifier = Modifier.fillMaxWidth(), onSignUp, onLogin)
+    }
+}
+
+// Mise en page commune Login / Sign up : le contenu prend toute la largeur et est centré verticalement.
+// Il défile quand il ne tient pas (petit écran, clavier ouvert).
+@Composable
+fun AuthLayout(content: @Composable ColumnScope.() -> Unit) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
                 .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-            Logo(modifier = Modifier.heightIn(max = 160.dp), verticalArrangement = Arrangement.Center)
-            FormLogin(modifier = Modifier.widthIn(max = 480.dp), onSignUp, onLogin)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    // Au moins la hauteur de l'écran, sinon le centrage vertical n'a pas d'effet dans un scroll
+                    .heightIn(min = maxHeight)
+                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
+                content = content,
+            )
         }
     }
 }
@@ -72,9 +92,14 @@ fun LoginScreen (onSignUp:()-> Unit, onLogin: () -> Unit){
 @Composable
 fun Logo(modifier: Modifier, verticalArrangement: Arrangement.Vertical) {
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
-        Image(
+        /*Image(
             painter = painterResource(id = R.drawable.uqac_logo),
             contentDescription = stringResource(R.string.logo_uqac)
+        )*/
+        Icon(
+            Icons.Outlined.AccessAlarm,
+            contentDescription = "Logo Alarm",
+            modifier = Modifier.size(120.dp),
         )
     }
 

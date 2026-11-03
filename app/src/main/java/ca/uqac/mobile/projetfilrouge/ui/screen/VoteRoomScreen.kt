@@ -55,6 +55,7 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
@@ -161,16 +162,18 @@ private fun VoteRoomContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             SecondaryButton(
                 stringResource(R.string.vote_against),
+                modifier = Modifier.weight(1f),
                 contentColor = VoteAgainst,
                 enabled = !isVoting,
                 onClick = { onVote(selected.id, false) },
             )
             PrimaryButton(
                 stringResource(R.string.vote_for),
+                modifier = Modifier.weight(1f),
                 contentColor = VoteFor,
                 enabled = !isVoting,
                 onClick = { onVote(selected.id, true) },
@@ -206,6 +209,7 @@ private fun ProposalTabs(polls: List<AlarmPoll>, selectedId: String, onSelect: (
 
 private fun JsonObject.int(key: String): Int? = (this[key] as? JsonPrimitive)?.intOrNull
 private fun JsonObject.text(key: String): String? = (this[key] as? JsonPrimitive)?.contentOrNull
+private fun JsonObject.bool(key: String): Boolean? = (this[key] as? JsonPrimitive)?.booleanOrNull
 private fun JsonObject.intList(key: String): List<Int>? =
     (this[key] as? JsonArray)?.mapNotNull { it.jsonPrimitive.intOrNull }
 
@@ -229,7 +233,21 @@ private fun tabLabel(poll: AlarmPoll): String = when {
     poll.changesTime -> poll.newTime()
     "days" in poll.changes -> daysText(poll.changes.intList("days").orEmpty())
     "ringtone" in poll.changes -> poll.changes.text("ringtone").orEmpty().ifBlank { stringResource(R.string.ringtone_default) }
+    "name" in poll.changes -> poll.changes.text("name").orEmpty()
+    "sound" in poll.changes -> stringResource(R.string.alarm_sound)
+    "vibrations" in poll.changes -> stringResource(R.string.alarm_vibrations)
     else -> poll.changes.text("snooze").orEmpty()
+}
+
+@Composable
+private fun onOffText(value: Boolean) = stringResource(if (value) R.string.vote_on else R.string.vote_off)
+
+// "Son : Activé → Désactivé" ; un booléen qui change avait forcément la valeur inverse avant
+@Composable
+private fun switchLine(poll: AlarmPoll, key: String, label: String): String {
+    val new = poll.changes.bool(key) ?: false
+    val old = poll.previous.bool(key) ?: !new
+    return stringResource(R.string.vote_setting, label, stringResource(R.string.vote_change, onOffText(old), onOffText(new)))
 }
 
 // Une ligne "avant → après" par réglage modifié
@@ -253,6 +271,15 @@ private fun changeLines(poll: AlarmPoll): List<String> = buildList {
             ),
         )
     )
+    if ("name" in poll.changes) add(
+        stringResource(
+            R.string.vote_setting,
+            stringResource(R.string.alarm_name),
+            stringResource(R.string.vote_change, poll.previous.text("name").orEmpty().ifEmpty { "—" }, poll.changes.text("name").orEmpty().ifEmpty { "—" }),
+        )
+    )
+    if ("sound" in poll.changes) add(switchLine(poll, "sound", stringResource(R.string.alarm_sound)))
+    if ("vibrations" in poll.changes) add(switchLine(poll, "vibrations", stringResource(R.string.alarm_vibrations)))
     if ("snooze" in poll.changes) add(
         stringResource(
             R.string.vote_snooze,

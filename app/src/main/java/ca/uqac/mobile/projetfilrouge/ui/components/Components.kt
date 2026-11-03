@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ca.uqac.mobile.projetfilrouge.AppVibrator
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -90,24 +91,27 @@ fun BottomNavBar(selectedTab: NavTab, onTabSelected: (NavTab) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(vertical = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
         Row(
             Modifier
+                .fillMaxWidth()
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface)
         ) {
             NavTab.entries.forEach { tab ->
                 Box(
                     Modifier
+                        .weight(1f)
                         .clip(CircleShape)
                         .background(
                             if (tab == selectedTab) MaterialTheme.colorScheme.surfaceVariant
                             else Color.Transparent
                         )
                         .clickable { onTabSelected(tab) }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(tab.icon, contentDescription = stringResource(tab.labelRes))
                 }
@@ -124,6 +128,7 @@ fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
+        fontSize = 50.sp
     )
 }
 
@@ -216,9 +221,9 @@ fun SwitchRow(
     modifier: Modifier = Modifier,
     onCheckedChange: ((Boolean) -> Unit)? = null,
 ) {
-    AppCard(modifier, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+    AppCard(modifier, contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+            Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
             SmallSwitch(checked, onCheckedChange)
         }
     }
@@ -260,7 +265,7 @@ fun PillTextField(
     placeholder: String,
     modifier: Modifier = Modifier,
 ) {
-    val textStyle = MaterialTheme.typography.bodyMedium.copy(
+    val textStyle = MaterialTheme.typography.bodyLarge.copy(
         color = MaterialTheme.colorScheme.onSurface,
         textAlign = TextAlign.Center,
     )
@@ -274,7 +279,7 @@ fun PillTextField(
             .fillMaxWidth()
             .clip(PillShape)
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         decorationBox = { innerTextField ->
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 if (value.isEmpty()) Text(placeholder, style = textStyle)
@@ -299,13 +304,13 @@ fun PillDropdown(
                 .clip(PillShape)
                 .background(MaterialTheme.colorScheme.background)
                 .clickable { expanded = true }
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 label,
                 Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
             Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, Modifier.size(20.dp))

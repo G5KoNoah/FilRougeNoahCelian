@@ -46,13 +46,19 @@
     <string name="avatar_error">Impossible de mettre à jour la photo de profil</string>
 
     <!-- Liste des alarmes -->
-    <string name="alarms_none_scheduled">Aucune alarme\nprévue</string>
+    <string name="alarms_next">Prochaine alarme</string>
+    <string name="alarms_none_scheduled">Aucune alarme prévue</string>
+    <string name="alarms_all_disabled">Toutes tes alarmes sont désactivées.</string>
+    <string name="alarms_list_title">Mes alarmes</string>
+    <string name="alarms_today">Aujourd\'hui</string>
+    <string name="alarms_tomorrow">Demain</string>
     <string name="alarms_add">Ajouter une alarme</string>
     <string name="alarms_empty">Aucune alarme pour l\'instant. Touche + pour en créer une.</string>
     <string name="alarms_every_day">Tous les jours</string>
     <string name="alarms_weekdays">En semaine</string>
     <string name="alarms_weekends">Le week-end</string>
-    <string name="alarms_in">Alarme dans %1$s\net %2$s</string>
+    <string name="alarms_in_one">dans %1$s</string>
+    <string name="alarms_in_two">dans %1$s et %2$s</string>
     <plurals name="duration_days">
         <item quantity="one">%d jour</item>
         <item quantity="many">%d jours</item>
@@ -78,6 +84,15 @@
         <item>ven.</item>
         <item>sam.</item>
     </string-array>
+    <string-array name="day_names">
+        <item>Dimanche</item>
+        <item>Lundi</item>
+        <item>Mardi</item>
+        <item>Mercredi</item>
+        <item>Jeudi</item>
+        <item>Vendredi</item>
+        <item>Samedi</item>
+    </string-array>
     <string-array name="day_letters">
         <item>D</item>
         <item>L</item>
@@ -101,6 +116,7 @@
     <string name="alarm_members_no_contacts">Tu n\'as pas encore de contacts. Ajoute-en depuis l\'onglet Contacts.</string>
     <string name="alarm_members_done">Terminé</string>
     <string name="alarm_save">Enregistrer</string>
+    <string name="alarm_save_members">Ajouter les membres</string>
     <string name="alarm_delete">Supprimer</string>
     <string name="alarm_leave">Quitter</string>
     <string name="alarm_delete_title">Supprimer cette alarme ?</string>
@@ -163,9 +179,11 @@
     <string name="vote_ringtone">Sonnerie : %1$s</string>
     <string name="vote_snooze">Rappel : %1$s</string>
     <string name="vote_change">%1$s → %2$s</string>
+    <string name="vote_setting">%1$s : %2$s</string>
+    <string name="vote_on">Activé</string>
+    <string name="vote_off">Désactivé</string>
 
     <!-- Modifier une alarme : votes -->
-    <string name="alarm_poll_needed">L\'heure, les jours, la sonnerie et le rappel sont partagés : les changer demande un vote. Enregistrer ne garde que le nom, le son et les vibrations.</string>
     <string name="alarm_open_vote_room">Salle de vote</string>
     <string name="alarm_error_poll">Impossible de lancer le vote</string>
 </resources>
