@@ -172,22 +172,27 @@ class AlarmEditViewModel(
     // on ne coche / décoche que les nouveaux, qui seront ajoutés au Save
     fun isSavedMember(uid: String): Boolean = uid == ownerId || uid in original?.members.orEmpty()
 
+    // Membres cochés mais pas encore enregistrés
+    val newMembers: List<String> get() = members - original?.members.orEmpty().toSet()
+
     fun toggleMember(uid: String) {
         if (isSavedMember(uid)) return
         members = if (uid in members) members - uid else members + uid
     }
 
+    // Alarme seule (ou nouvelle) : on enregistre directement tous les réglages
     fun save(onDone: () -> Unit) {
         val me = myUid ?: return
+        // Alarme partagée : les réglages passent par un vote, Save n'ajoute que les membres
+        if (needsVote) return saveMembers()
         launchSaving(str(R.string.alarm_error_save)) {
-            val o = original
             val alarm = SharedAlarm(
                 id = alarmId.orEmpty(),
                 name = name.trim(),
-                hour = if (needsVote && o != null) o.hour else hour,
-                minute = if (needsVote && o != null) o.minute else minute,
-                days = if (needsVote && o != null) o.days else days.sorted(),
-                ringtone = if (needsVote && o != null) o.ringtone else ringtone.orEmpty(),
+                hour = hour,
+                minute = minute,
+                days = days.sorted(),
+                ringtone = ringtone.orEmpty(),
                 sound = sound,
                 vibrations = vibrations,
                 members = members,
@@ -196,10 +201,20 @@ class AlarmEditViewModel(
                 AlarmRepository.createAlarm(me, alarm)
             } else {
                 AlarmRepository.updateSettings(alarm)
-                val nouveaux = members - original?.members.orEmpty().toSet()
-                for (uid in nouveaux) AlarmRepository.addMember(alarmId, uid)
+                for (uid in newMembers) AlarmRepository.addMember(alarmId, uid)
             }
             onDone()
+        }
+    }
+
+    // Alarme partagée : ajoute les membres cochés, sans toucher aux réglages (qui se votent)
+    fun saveMembers() {
+        val id = alarmId ?: return
+        val added = newMembers
+        if (added.isEmpty()) return
+        launchSaving(str(R.string.alarm_error_add_member)) {
+            for (uid in added) AlarmRepository.addMember(id, uid)
+            original = original?.copy(members = original?.members.orEmpty() + added)
         }
     }
 
@@ -228,7 +243,7 @@ class AlarmEditViewModel(
     }
 
 
-    // Une alarme à plusieurs membres demande un vote pour ces réglages
+    // Une alarme à plusieurs membres demande un vote pour tous ses réglages
     val needsVote: Boolean get() = (original?.members?.size ?: 0) > 1
 
     // Seulement les réglages votables qui ont changé
@@ -241,6 +256,9 @@ class AlarmEditViewModel(
                 JsonArray(days.sorted().map { JsonPrimitive(it) })
             )
             if (ringtone.orEmpty() != o.ringtone) put("ringtone", ringtone.orEmpty())
+            if (name.trim() != o.name) put("name", name.trim())
+            if (sound != o.sound) put("sound", sound)
+            if (vibrations != o.vibrations) put("vibrations", vibrations)
         }
     }
 

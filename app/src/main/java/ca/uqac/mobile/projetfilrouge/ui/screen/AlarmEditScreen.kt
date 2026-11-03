@@ -116,9 +116,15 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                 }
             }
 
-            // Vote
-            AppCard(contentPadding = PaddingValues(20.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Son et vibrations
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SwitchRow(stringResource(R.string.alarm_sound), checked = viewModel.sound, onCheckedChange = viewModel::onSoundChange)
+                SwitchRow(stringResource(R.string.alarm_vibrations), checked = viewModel.vibrations, onCheckedChange = viewModel::onVibrationsChange)
+            }
+
+            // Vote : seulement pour une alarme partagée (le bouton "Lancer le vote" est en bas)
+            if (viewModel.needsVote) {
+                AppCard(contentPadding = PaddingValues(20.dp)) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -129,19 +135,6 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                             onSelect = { viewModel.onPollDurationSelected(it) },
                             modifier = Modifier.weight(1f),
                         )
-                        PrimaryButton(
-                            stringResource(R.string.alarm_start_poll),
-                            enabled = viewModel.canStartPoll && !viewModel.isSaving,
-                            onClick = { viewModel.startPoll { viewModel.alarmId?.let(onOpenVoteRoom) } },
-                        )
-                    }
-                    // Alarme partagée : on explique pourquoi Save ne change pas l'heure, et on donne accès aux votes en cours
-                    if (viewModel.needsVote) {
-                        Text(
-                            stringResource(R.string.alarm_poll_needed),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
                         viewModel.alarmId?.let { id ->
                             TextButton(onClick = { onOpenVoteRoom(id) }) {
                                 Text(stringResource(R.string.alarm_open_vote_room))
@@ -149,12 +142,6 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                         }
                     }
                 }
-            }
-
-            // Son et vibrations
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                SwitchRow(stringResource(R.string.alarm_sound), checked = viewModel.sound, onCheckedChange = viewModel::onSoundChange)
-                SwitchRow(stringResource(R.string.alarm_vibrations), checked = viewModel.vibrations, onCheckedChange = viewModel::onVibrationsChange)
             }
 
             // Membres
@@ -167,6 +154,15 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                     IconButton(onClick = viewModel::openMemberPicker) {
                         Icon(Icons.Outlined.PersonAddAlt, contentDescription = stringResource(R.string.alarm_add_member))
                     }
+                }
+                // Alarme partagée : seul l'ajout de membres s'enregistre directement
+                if (viewModel.needsVote && viewModel.newMembers.isNotEmpty()) {
+                    PrimaryButton(
+                        stringResource(R.string.alarm_save_members),
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                        enabled = !viewModel.isSaving,
+                        onClick = viewModel::saveMembers,
+                    )
                 }
             }
         }
@@ -186,7 +182,16 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                     onClick = { confirmRemove = true },
                 )
             }
-            PrimaryButton(stringResource(R.string.alarm_save), modifier = Modifier.weight(1f), enabled = !viewModel.isSaving, onClick = { viewModel.save(onDone = onBackScreen) })
+            if (viewModel.needsVote) {
+                PrimaryButton(
+                    stringResource(R.string.alarm_start_poll),
+                    modifier = Modifier.weight(1f),
+                    enabled = viewModel.canStartPoll && !viewModel.isSaving,
+                    onClick = { viewModel.startPoll { viewModel.alarmId?.let(onOpenVoteRoom) } },
+                )
+            } else {
+                PrimaryButton(stringResource(R.string.alarm_save), modifier = Modifier.weight(1f), enabled = !viewModel.isSaving, onClick = { viewModel.save(onDone = onBackScreen) })
+            }
         }
         Spacer(Modifier.height(16.dp))
     }

@@ -112,6 +112,7 @@
     <string name="alarm_members_no_contacts">Tu n\'as pas encore de contacts. Ajoute-en depuis l\'onglet Contacts.</string>
     <string name="alarm_members_done">Terminé</string>
     <string name="alarm_save">Enregistrer</string>
+    <string name="alarm_save_members">Ajouter les membres</string>
     <string name="alarm_delete">Supprimer</string>
     <string name="alarm_leave">Quitter</string>
     <string name="alarm_delete_title">Supprimer cette alarme ?</string>
@@ -168,9 +169,11 @@
     <string name="vote_ringtone">Sonnerie : %1$s</string>
     <string name="vote_snooze">Rappel : %1$s</string>
     <string name="vote_change">%1$s → %2$s</string>
+    <string name="vote_setting">%1$s : %2$s</string>
+    <string name="vote_on">Activé</string>
+    <string name="vote_off">Désactivé</string>
 
     <!-- Modifier une alarme : votes -->
-    <string name="alarm_poll_needed">L\'heure, les jours, la sonnerie et le rappel sont partagés : les changer demande un vote. Enregistrer ne garde que le nom, le son et les vibrations.</string>
     <string name="alarm_open_vote_room">Salle de vote</string>
     <string name="alarm_error_poll">Impossible de lancer le vote</string>
 </resources>
