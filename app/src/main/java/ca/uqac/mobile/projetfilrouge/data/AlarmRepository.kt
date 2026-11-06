@@ -18,7 +18,7 @@ object AlarmRepository {
     fun observeAlarmsOf(uid: String): Flow<List<SharedAlarm>> = observeTable("alarms") {
         alarms.select { filter { contains("members", listOf(uid)) } }
             .decodeList<SharedAlarm>()
-            .sortedWith(compareBy({ it.hour }, { it.minute }))
+            .sortedWith(compareBy({ it.hour }, { it.minute }, { it.createdAt }, { it.id }))
     }
 
     fun observeAlarm(alarmId: String): Flow<SharedAlarm?> = observeTable("alarms") {

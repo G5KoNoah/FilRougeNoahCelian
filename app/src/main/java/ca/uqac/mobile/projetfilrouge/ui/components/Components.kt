@@ -229,9 +229,15 @@ fun SecondaryButton(
 
 @Composable
 fun SmallSwitch(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)? = null) {
+    var shown by remember(checked) { mutableStateOf(checked) }
     Switch(
-        checked = checked,
-        onCheckedChange = onCheckedChange,
+        checked = shown,
+        onCheckedChange = onCheckedChange?.let { callback ->
+            { newValue ->
+                shown = newValue
+                callback(newValue)
+            }
+        },
         modifier = Modifier.scale(0.7f),
         colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary),
     )
