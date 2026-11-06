@@ -77,7 +77,7 @@ private fun AddContactContent(
 ) {
     ScreenLayout {
         BackHeader(stringResource(R.string.add_contact_title), onBack = onBack)
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(24.dp))
         TextField(
             value = query,
             onValueChange = onQueryChange,

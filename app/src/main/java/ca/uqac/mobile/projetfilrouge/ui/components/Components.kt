@@ -145,7 +145,8 @@ fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
-        fontSize = 50.sp
+        fontSize = 30.sp,
+        lineHeight = 30.sp,
     )
 }
 
@@ -159,7 +160,12 @@ fun BackHeader(title: String, onBack: () -> Unit = {}) {
         IconButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
         }
-        ScreenTitle(title, Modifier.align(Alignment.Center))
+        ScreenTitle(
+            title,
+            Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 80.dp),
+        )
     }
 }
 
