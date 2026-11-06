@@ -88,12 +88,20 @@ fun NavGraph() {
                 AlarmEditScreen(
                     onBackScreen = { navController.popBackStack() },
                     onOpenVoteRoom = { alarmId -> navController.navigate("voteRoom/$alarmId") },
+                    onPollStarted = { alarmId ->
+                        navController.navigate("voteRoom/$alarmId") {
+                            popUpTo("alarmEdit?alarmId={alarmId}") { inclusive = true }
+                        }
+                    },
                 )
             }
             composable(NavTab.Alarms.route) {
                 AlarmsScreen( onAlarmEdit = { alarmId ->
                     navController.navigate(if (alarmId == null) "alarmEdit" else "alarmEdit?alarmId=$alarmId")
-            })
+            },
+                    onVoteRoom =
+                        { alarmId -> navController.navigate("voteRoom/$alarmId") }
+                    )
             }
             composable(NavTab.Contacts.route) {
                 ContactsScreen(onAddContact = {
@@ -117,7 +125,7 @@ fun NavGraph() {
                 "voteRoom/{alarmId}",
                 arguments = listOf(navArgument("alarmId") { type = NavType.StringType }),
             ) {
-                VoteRoomScreen(onBack = { navController.popBackStack() })
+                VoteRoomScreen(onBack = { navController.navigate(NavTab.Alarms.route) })
             }
         }
     }

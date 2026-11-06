@@ -17,6 +17,17 @@ object PollRepository {
         polls.select { filter { eq("alarm_id", alarmId) } }.decodeList<AlarmPoll>()
     }
 
+    // Votes encore ouverts sur ces alarmes (ceux dont le temps est écoulé sont filtrés avec isOpen(now))
+    fun observeOpenPolls(alarmIds: List<String>): Flow<List<AlarmPoll>> = observeTable("alarm_polls") {
+        if (alarmIds.isEmpty()) emptyList()
+        else polls.select {
+            filter {
+                isIn("alarm_id", alarmIds)
+                eq("status", "open")
+            }
+        }.decodeList<AlarmPoll>()
+    }
+
     fun observeVotes(pollIds: List<String>): Flow<List<PollVote>> = observeTable("poll_votes") {
         if (pollIds.isEmpty()) emptyList()
         else votes.select { filter { isIn("poll_id", pollIds) } }.decodeList<PollVote>()
@@ -35,4 +46,5 @@ object PollRepository {
             put("p_vote", vote)
         })
     }
+
 }

@@ -9,20 +9,24 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.HowToVote
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.AlarmScheduler
+import ca.uqac.mobile.projetfilrouge.data.AlarmPoll
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.CardShape
@@ -56,7 +61,7 @@ import ca.uqac.mobile.projetfilrouge.viewModel.SharedAlarmsViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun AlarmsScreen(onAlarmEdit: (String?) -> Unit) {
+fun AlarmsScreen(onAlarmEdit: (String?) -> Unit, onVoteRoom: (String) -> Unit) {
     // Android 13+ : sans cette permission, la notification de l'alarme ne s'affiche pas.
     // Demandée une seule fois, à l'ouverture de l'écran.
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -69,14 +74,17 @@ fun AlarmsScreen(onAlarmEdit: (String?) -> Unit) {
     val uid by viewModel.uid.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val memberAvatars by viewModel.memberAvatars.collectAsStateWithLifecycle()
+    val openPolls by viewModel.openPolls.collectAsStateWithLifecycle()
 
     AlarmsContent(
         alarms = alarms,
         memberAvatars = memberAvatars,
+        openPolls = openPolls,
         myUid = uid.orEmpty(),
         error = error,
         onAdd = { onAlarmEdit(null) },
         onOpen = { onAlarmEdit(it.id) },
+        onVoteRoom = { onVoteRoom(it.id) },
         onEnabledChange = viewModel::setEnabled,
     )
 }
@@ -85,10 +93,12 @@ fun AlarmsScreen(onAlarmEdit: (String?) -> Unit) {
 private fun AlarmsContent(
     alarms: List<SharedAlarm>,
     memberAvatars: Map<String, String?>,
+    openPolls: List<AlarmPoll> = emptyList(),
     myUid: String,
     error: String?,
     onAdd: () -> Unit,
     onOpen: (SharedAlarm) -> Unit,
+    onVoteRoom: (SharedAlarm) -> Unit = {},
     onEnabledChange: (SharedAlarm, Boolean) -> Unit,
 ) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -103,6 +113,8 @@ private fun AlarmsContent(
         .filter { it.isEnabledFor(myUid) }
         .map { it to AlarmScheduler.nextOccurrence(it.hour, it.minute, it.days, now) }
         .minByOrNull { it.second }
+    // Nombre de votes encore ouverts par alarme
+    val openVoteCounts = openPolls.filter { it.isOpen(now) }.groupingBy { it.alarmId }.eachCount()
 
     ScreenLayout {
         Spacer(Modifier.height(24.dp))
@@ -137,8 +149,10 @@ private fun AlarmsContent(
                 AlarmCard(
                     alarm = alarm,
                     avatarUrls = alarm.members.take(5).map { memberAvatars[it] },
+                    openVotes = openVoteCounts[alarm.id] ?: 0,
                     enabled = alarm.isEnabledFor(myUid),
                     onClick = { onOpen(alarm) },
+                    onOpenVotes = { onVoteRoom(alarm) },
                     onEnabledChange = { onEnabledChange(alarm, it) },
                 )
             }
@@ -150,8 +164,10 @@ private fun AlarmsContent(
 private fun AlarmCard(
     alarm: SharedAlarm,
     avatarUrls: List<String?>,
+    openVotes: Int,
     enabled: Boolean,
     onClick: () -> Unit,
+    onOpenVotes: () -> Unit,
     onEnabledChange: (Boolean) -> Unit,
 ) {
     AppCard(
@@ -177,6 +193,36 @@ private fun AlarmCard(
                 MemberAvatars(avatarUrls)
             }
         }
+        if (openVotes > 0) OpenVotesBadge(openVotes, onClick = onOpenVotes)
+    }
+}
+
+// Pastille "2 votes en cours" : visible même si l'alarme est désactivée pour moi.
+// La toucher ouvre la salle de vote (et non l'écran d'édition comme le reste de la carte).
+@Composable
+private fun OpenVotesBadge(count: Int, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.Outlined.HowToVote,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onPrimary,
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            pluralStringResource(R.plurals.alarms_open_votes, count, count),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimary,
+        )
     }
 }
 

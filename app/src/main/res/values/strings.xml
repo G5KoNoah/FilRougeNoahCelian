@@ -60,6 +60,10 @@
     <string name="alarms_weekends">Weekends</string>
     <string name="alarms_in_one">in %1$s</string>
     <string name="alarms_in_two">in %1$s and %2$s</string>
+    <plurals name="alarms_open_votes">
+        <item quantity="one">%d vote in progress</item>
+        <item quantity="other">%d votes in progress</item>
+    </plurals>
     <plurals name="duration_days">
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>

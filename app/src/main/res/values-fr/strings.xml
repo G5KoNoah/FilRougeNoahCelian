@@ -59,6 +59,11 @@
     <string name="alarms_weekends">Le week-end</string>
     <string name="alarms_in_one">dans %1$s</string>
     <string name="alarms_in_two">dans %1$s et %2$s</string>
+    <plurals name="alarms_open_votes">
+        <item quantity="one">%d vote en cours</item>
+        <item quantity="many">%d votes en cours</item>
+        <item quantity="other">%d votes en cours</item>
+    </plurals>
     <plurals name="duration_days">
         <item quantity="one">%d jour</item>
         <item quantity="many">%d jours</item>

@@ -79,7 +79,12 @@ import androidx.compose.ui.text.style.TextOverflow
 
 
 @Composable
-fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = {}) {
+// onPollStarted : après "Lancer le vote", on ouvre la salle de vote à la place de cet écran
+fun AlarmEditScreen(
+    onBackScreen: ()-> Unit,
+    onOpenVoteRoom: (String) -> Unit = {},
+    onPollStarted: (String) -> Unit = onOpenVoteRoom,
+) {
     val viewModel : AlarmEditViewModel = viewModel()
     var confirmRemove by remember { mutableStateOf(false) }
     val pickRingtone = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -215,7 +220,7 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                     stringResource(R.string.alarm_start_poll),
                     modifier = Modifier.weight(1f),
                     enabled = viewModel.canStartPoll && !viewModel.isSaving,
-                    onClick = { viewModel.startPoll { viewModel.alarmId?.let(onOpenVoteRoom) } },
+                    onClick = { viewModel.startPoll { viewModel.alarmId?.let(onPollStarted) } },
                 )
             } else {
                 PrimaryButton(stringResource(R.string.alarm_save), modifier = Modifier.weight(1f), enabled = !viewModel.isSaving, onClick = { viewModel.save(onDone = onBackScreen) })

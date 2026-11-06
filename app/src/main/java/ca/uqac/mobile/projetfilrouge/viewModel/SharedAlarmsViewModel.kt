@@ -5,7 +5,9 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import android.app.Application
 import androidx.lifecycle.viewModelScope
+import ca.uqac.mobile.projetfilrouge.data.AlarmPoll
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
+import ca.uqac.mobile.projetfilrouge.data.PollRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.data.uidChanges
 import kotlinx.coroutines.Job
@@ -30,10 +32,16 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
     private val _memberAvatars = MutableStateFlow<Map<String, String?>>(emptyMap())
     val memberAvatars: StateFlow<Map<String, String?>> = _memberAvatars.asStateFlow()
 
+    // Votes ouverts sur mes alarmes : sert au compteur "votes en cours" de chaque carte
+    private val _openPolls = MutableStateFlow<List<AlarmPoll>>(emptyList())
+    val openPolls: StateFlow<List<AlarmPoll>> = _openPolls.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
     private var observeJob: Job? = null
+    private var pollsJob: Job? = null
+    private var watchedAlarmIds: List<String>? = null
 
     init {
         viewModelScope.launch { uidChanges.collect { onUserChanged(it) } }
@@ -43,8 +51,11 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
         if (newUid == _uid.value && newUid != null) return
 
         observeJob?.cancel()
+        pollsJob?.cancel()
+        watchedAlarmIds = null
         _uid.value = newUid
         _alarms.value = emptyList()
+        _openPolls.value = emptyList()
         _error.value = null
 
         if (newUid == null) {
@@ -57,7 +68,20 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
                 .collect { alarms ->
                     _alarms.value = alarms
                     loadMemberAvatars(alarms.flatMap { it.members }.distinct())
+                    observePollsOf(alarms.map { it.id }.sorted())
                 }
+        }
+    }
+
+    // On ne se réabonne que si la liste des alarmes change (pas à chaque modification d'une alarme)
+    private fun observePollsOf(alarmIds: List<String>) {
+        if (alarmIds == watchedAlarmIds) return
+        watchedAlarmIds = alarmIds
+        pollsJob?.cancel()
+        pollsJob = viewModelScope.launch {
+            PollRepository.observeOpenPolls(alarmIds)
+                .catch { }
+                .collect { _openPolls.value = it }
         }
     }
 
