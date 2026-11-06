@@ -48,6 +48,7 @@ import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.CardShape
 import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatars
+import ca.uqac.mobile.projetfilrouge.data.Friend
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenLayout
 import ca.uqac.mobile.projetfilrouge.ui.components.SmallSwitch
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
@@ -68,11 +69,11 @@ fun AlarmsScreen(onAlarmEdit: (String?) -> Unit) {
     val alarms by viewModel.alarms.collectAsStateWithLifecycle()
     val uid by viewModel.uid.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
-    val memberAvatars by viewModel.memberAvatars.collectAsStateWithLifecycle()
+    val memberProfiles by viewModel.memberProfiles.collectAsStateWithLifecycle()
 
     AlarmsContent(
         alarms = alarms,
-        memberAvatars = memberAvatars,
+        memberProfiles = memberProfiles,
         myUid = uid.orEmpty(),
         error = error,
         onAdd = { onAlarmEdit(null) },
@@ -84,7 +85,7 @@ fun AlarmsScreen(onAlarmEdit: (String?) -> Unit) {
 @Composable
 private fun AlarmsContent(
     alarms: List<SharedAlarm>,
-    memberAvatars: Map<String, String?>,
+    memberProfiles: Map<String, Friend?>,
     myUid: String,
     error: String?,
     onAdd: () -> Unit,
@@ -136,7 +137,7 @@ private fun AlarmsContent(
             items(alarms, key = { it.id }) { alarm ->
                 AlarmCard(
                     alarm = alarm,
-                    avatarUrls = alarm.members.take(5).map { memberAvatars[it] },
+                    members = alarm.members.take(5).map { memberProfiles[it] },
                     enabled = alarm.isEnabledFor(myUid),
                     onClick = { onOpen(alarm) },
                     onEnabledChange = { onEnabledChange(alarm, it) },
@@ -149,7 +150,7 @@ private fun AlarmsContent(
 @Composable
 private fun AlarmCard(
     alarm: SharedAlarm,
-    avatarUrls: List<String?>,
+    members: List<Friend?>,
     enabled: Boolean,
     onClick: () -> Unit,
     onEnabledChange: (Boolean) -> Unit,
@@ -174,7 +175,7 @@ private fun AlarmCard(
             }
             Column(horizontalAlignment = Alignment.End) {
                 SmallSwitch(enabled, onCheckedChange = onEnabledChange)
-                MemberAvatars(avatarUrls)
+                MemberAvatars(members)
             }
         }
     }
@@ -297,7 +298,7 @@ private fun AlarmsScreenPreview() {
                 SharedAlarm(id = "1", name = "Gym", hour = 7, minute = 0, days = listOf(1, 3, 5), members = listOf("me")),
                 SharedAlarm(id = "2", hour = 8, minute = 30, members = listOf("me", "a", "b")),
             ),
-            memberAvatars = emptyMap(),
+            memberProfiles = emptyMap(),
             myUid = "me",
             error = null,
             onAdd = {},

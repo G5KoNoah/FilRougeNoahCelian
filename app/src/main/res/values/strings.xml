@@ -42,7 +42,6 @@
     <string name="account_theme">Theme:</string>
     <string name="account_logout">Logout</string>
     <string name="account_not_found">Profile not found</string>
-    <string name="avatar_description">Profile picture</string>
     <string name="avatar_change">Change profile picture</string>
     <string name="avatar_error">Couldn\'t update the profile picture</string>
 

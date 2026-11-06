@@ -47,7 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.AppVibrator
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatars
-import ca.uqac.mobile.projetfilrouge.ui.components.MemberAvatar
+import ca.uqac.mobile.projetfilrouge.ui.components.UserAvatar
 import ca.uqac.mobile.projetfilrouge.ui.components.PillDropdown
 import ca.uqac.mobile.projetfilrouge.ui.components.PillTextField
 import ca.uqac.mobile.projetfilrouge.ui.components.PrimaryButton
@@ -177,7 +177,7 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(stringResource(R.string.alarm_members), style = MaterialTheme.typography.titleSmall)
-                        MemberAvatars(viewModel.members.take(6).map(viewModel::avatarOf))
+                        MemberAvatars(viewModel.members.take(6).map(viewModel::profileOf))
                     }
                     IconButton(onClick = viewModel::openMemberPicker) {
                         Icon(Icons.Outlined.PersonAddAlt, contentDescription = stringResource(R.string.alarm_add_member))
@@ -267,7 +267,7 @@ fun AlarmEditScreen(onBackScreen: ()-> Unit, onOpenVoteRoom: (String) -> Unit = 
                                     onCheckedChange = { viewModel.toggleMember(friend.uid) },
                                     enabled = !saved,
                                 )
-                                MemberAvatar(friend.avatarUrl, size = 32.dp)
+                                UserAvatar(friend.avatarUrl, friend.displayName, size = 32.dp)
                                 Spacer(Modifier.width(12.dp))
                                 Text(friend.displayName, Modifier.weight(1f))
                             }

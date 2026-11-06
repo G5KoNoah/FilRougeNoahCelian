@@ -2,7 +2,6 @@ package ca.uqac.mobile.projetfilrouge.ui.screen
 
 
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,8 +53,7 @@ import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import coil3.compose.AsyncImage
+import ca.uqac.mobile.projetfilrouge.ui.components.UserAvatar
 
 @Composable
 fun AccountScreen(onLogout: () -> Unit) {
@@ -117,6 +114,7 @@ fun MainInfo(
     ) {
         Avatar(
             avatarUrl = account?.avatarUrl,
+            name = account?.let { "${it.firstName} ${it.lastName}".trim().ifEmpty { it.email } },
             isUploading = isUploadingAvatar,
             onClick = onChangeAvatar,
         )
@@ -129,7 +127,7 @@ fun MainInfo(
 }
 
 @Composable
-private fun Avatar(avatarUrl: String?, isUploading: Boolean, onClick: () -> Unit) {
+private fun Avatar(avatarUrl: String?, name: String?, isUploading: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(120.dp)
@@ -140,23 +138,7 @@ private fun Avatar(avatarUrl: String?, isUploading: Boolean, onClick: () -> Unit
             ),
         contentAlignment = Alignment.Center,
     ) {
-        if (avatarUrl == null) {
-            Image(
-                painter = painterResource(id = R.drawable.uqac_logo),
-                contentDescription = stringResource(R.string.logo_uqac),
-                modifier = Modifier.matchParentSize(),
-            )
-        } else {
-            AsyncImage(
-                model = avatarUrl,
-                contentDescription = stringResource(R.string.avatar_description),
-                contentScale = ContentScale.Crop,
-                error = painterResource(id = R.drawable.uqac_logo),
-                modifier = Modifier
-                    .matchParentSize()
-                    .clip(CircleShape),
-            )
-        }
+        UserAvatar(avatarUrl, name, size = 120.dp)
         if (isUploading) {
             CircularProgressIndicator()
         }

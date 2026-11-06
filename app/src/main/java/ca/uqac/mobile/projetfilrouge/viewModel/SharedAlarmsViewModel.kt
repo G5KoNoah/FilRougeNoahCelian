@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import ca.uqac.mobile.projetfilrouge.data.Friend
 import ca.uqac.mobile.projetfilrouge.data.FriendRepository
 
 class SharedAlarmsViewModel(application: Application) : AndroidViewModel(application) {
@@ -27,8 +28,8 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
     private val _alarms = MutableStateFlow<List<SharedAlarm>>(emptyList())
     val alarms: StateFlow<List<SharedAlarm>> = _alarms.asStateFlow()
 
-    private val _memberAvatars = MutableStateFlow<Map<String, String?>>(emptyMap())
-    val memberAvatars: StateFlow<Map<String, String?>> = _memberAvatars.asStateFlow()
+    private val _memberProfiles = MutableStateFlow<Map<String, Friend?>>(emptyMap())
+    val memberProfiles: StateFlow<Map<String, Friend?>> = _memberProfiles.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
@@ -56,18 +57,18 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
                 .catch { e -> _error.value = e.localizedMessage ?: str(R.string.error_server) }
                 .collect { alarms ->
                     _alarms.value = alarms
-                    loadMemberAvatars(alarms.flatMap { it.members }.distinct())
+                    loadMemberProfiles(alarms.flatMap { it.members }.distinct())
                 }
         }
     }
 
-    private fun loadMemberAvatars(uids: List<String>) {
-        val missing = uids.filter { it !in _memberAvatars.value }
+    private fun loadMemberProfiles(uids: List<String>) {
+        val missing = uids.filter { it !in _memberProfiles.value }
         if (missing.isEmpty()) return
         viewModelScope.launch {
             runCatching { FriendRepository.getFriends(missing) }.onSuccess { profiles ->
-                val found = profiles.associate { it.uid to it.avatarUrl }
-                _memberAvatars.value = _memberAvatars.value + missing.associateWith { found[it] }
+                val found = profiles.associateBy { it.uid }
+                _memberProfiles.value = _memberProfiles.value + missing.associateWith { found[it] }
             }
         }
     }

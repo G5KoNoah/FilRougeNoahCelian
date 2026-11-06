@@ -142,8 +142,7 @@ class AlarmEditViewModel(
         }
     }
 
-    fun avatarOf(uid: String): String? =
-        (memberProfiles[uid] ?: friends.find { it.uid == uid })?.avatarUrl
+    fun profileOf(uid: String): Friend? = memberProfiles[uid] ?: friends.find { it.uid == uid }
 
     fun onHourChange(value: Int) {
         hour = value
