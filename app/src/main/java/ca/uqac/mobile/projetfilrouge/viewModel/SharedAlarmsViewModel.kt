@@ -8,7 +8,13 @@ import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.data.uidChanges
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,8 +34,13 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
     private val _alarms = MutableStateFlow<List<SharedAlarm>>(emptyList())
     val alarms: StateFlow<List<SharedAlarm>> = _alarms.asStateFlow()
 
-    private val _memberProfiles = MutableStateFlow<Map<String, Friend?>>(emptyMap())
-    val memberProfiles: StateFlow<Map<String, Friend?>> = _memberProfiles.asStateFlow()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val memberProfiles: StateFlow<Map<String, Friend>> = _alarms
+        .map { alarms -> alarms.flatMap { it.members }.distinct().sorted() }
+        .distinctUntilChanged()
+        .flatMapLatest { uids -> FriendRepository.observeProfiles(uids).catch { emit(emptyList()) } }
+        .map { profiles -> profiles.associateBy { it.uid } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
@@ -55,21 +66,7 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
         observeJob = viewModelScope.launch {
             AlarmRepository.observeAlarmsOf(newUid)
                 .catch { e -> _error.value = e.localizedMessage ?: str(R.string.error_server) }
-                .collect { alarms ->
-                    _alarms.value = alarms
-                    loadMemberProfiles(alarms.flatMap { it.members }.distinct())
-                }
-        }
-    }
-
-    private fun loadMemberProfiles(uids: List<String>) {
-        val missing = uids.filter { it !in _memberProfiles.value }
-        if (missing.isEmpty()) return
-        viewModelScope.launch {
-            runCatching { FriendRepository.getFriends(missing) }.onSuccess { profiles ->
-                val found = profiles.associateBy { it.uid }
-                _memberProfiles.value = _memberProfiles.value + missing.associateWith { found[it] }
-            }
+                .collect { _alarms.value = it }
         }
     }
 

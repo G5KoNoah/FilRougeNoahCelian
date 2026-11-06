@@ -57,7 +57,7 @@ class FriendsViewModel(application: Application) : AndroidViewModel(application)
                     .catch { e -> _error.value = e.localizedMessage ?: str(R.string.error_server) }
                     .collectLatest { friendUids ->
                         try {
-                            _friends.value = FriendRepository.getFriends(friendUids)
+                            FriendRepository.observeProfiles(friendUids).collect { _friends.value = it }
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {

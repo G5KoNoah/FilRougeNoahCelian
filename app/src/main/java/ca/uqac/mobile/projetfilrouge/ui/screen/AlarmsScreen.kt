@@ -85,7 +85,7 @@ fun AlarmsScreen(onAlarmEdit: (String?) -> Unit) {
 @Composable
 private fun AlarmsContent(
     alarms: List<SharedAlarm>,
-    memberProfiles: Map<String, Friend?>,
+    memberProfiles: Map<String, Friend>,
     myUid: String,
     error: String?,
     onAdd: () -> Unit,

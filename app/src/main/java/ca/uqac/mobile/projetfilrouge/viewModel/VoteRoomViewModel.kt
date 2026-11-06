@@ -51,10 +51,12 @@ class VoteRoomViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     // Profils des membres, pour afficher leur photo (ou leurs initiales) dans le cercle
+    @OptIn(ExperimentalCoroutinesApi::class)
     val memberProfiles: StateFlow<Map<String, Friend>> = alarm
         .map { it?.members.orEmpty() }
         .distinctUntilChanged()
-        .map { uids -> runCatching { FriendRepository.getFriends(uids) }.getOrDefault(emptyList()).associateBy { it.uid } }
+        .flatMapLatest { uids -> FriendRepository.observeProfiles(uids).catch { emit(emptyList()) } }
+        .map { profiles -> profiles.associateBy { it.uid } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     // Les propositions encore ouvertes ; celles dont le temps est écoulé sont filtrées à l'écran (isOpen(now))
