@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.data.Friend
+import ca.uqac.mobile.projetfilrouge.ui.components.UserAvatar
 import ca.uqac.mobile.projetfilrouge.data.FriendStatus
 import ca.uqac.mobile.projetfilrouge.data.UserSearchResult
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
@@ -133,6 +135,8 @@ private fun UserCard(
 ) {
     AppCard(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            UserAvatar(result.user.avatarUrl, result.user.displayName, size = 40.dp)
+            Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f).padding(end = 12.dp)) {
                 Text(result.user.displayName, style = MaterialTheme.typography.bodyLarge)
                 Text(

@@ -4,6 +4,7 @@ import ca.uqac.mobile.projetfilrouge.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -20,9 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.data.AlarmPoll
+import ca.uqac.mobile.projetfilrouge.data.Friend
+import ca.uqac.mobile.projetfilrouge.ui.components.UserAvatar
 import ca.uqac.mobile.projetfilrouge.data.PollVote
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
 import ca.uqac.mobile.projetfilrouge.ui.components.BackHeader
@@ -69,11 +69,13 @@ fun VoteRoomScreen(onBack: () -> Unit = {}) {
     val alarm by viewModel.alarm.collectAsStateWithLifecycle()
     val polls by viewModel.polls.collectAsStateWithLifecycle()
     val votes by viewModel.votes.collectAsStateWithLifecycle()
+    val memberProfiles by viewModel.memberProfiles.collectAsStateWithLifecycle()
 
     VoteRoomContent(
         polls = polls,
         votes = votes,
         members = alarm?.members.orEmpty(),
+        memberProfiles = memberProfiles,
         selectedPollId = viewModel.selectedPollId,
         error = viewModel.error,
         isVoting = viewModel.isVoting,
@@ -88,6 +90,7 @@ private fun VoteRoomContent(
     polls: List<AlarmPoll>,
     votes: List<PollVote>,
     members: List<String>,
+    memberProfiles: Map<String, Friend>,
     selectedPollId: String?,
     error: String?,
     isVoting: Boolean,
@@ -137,7 +140,7 @@ private fun VoteRoomContent(
             Spacer(Modifier.height(16.dp))
             VoteCircle(
                 members.map { uid ->
-                    when (pollVotes[uid]) {
+                    memberProfiles[uid] to when (pollVotes[uid]) {
                         true -> VoteFor
                         false -> VoteAgainst
                         null -> MaterialTheme.colorScheme.onSurfaceVariant
@@ -298,14 +301,15 @@ private fun remainingText(ms: Long): String {
 }
 
 @Composable
-private fun VoteCircle(memberColors: List<Color>, modifier: Modifier = Modifier) {
+// Chaque membre est entouré de la couleur de son vote (pour, contre, pas encore voté)
+private fun VoteCircle(members: List<Pair<Friend?, Color>>, modifier: Modifier = Modifier) {
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(1f),
         contentAlignment = Alignment.Center,
     ) {
-        val avatarSize = 28.dp
+        val avatarSize = 40.dp
         val radius = (maxWidth - avatarSize) / 2
 
         Box(
@@ -315,17 +319,17 @@ private fun VoteCircle(memberColors: List<Color>, modifier: Modifier = Modifier)
                 .background(VoteCircle)
         )
 
-        memberColors.forEachIndexed { index, color ->
-            val angle = -PI / 2 + 2 * PI * index / memberColors.size
-            Icon(
-                Icons.Outlined.AccountCircle,
-                contentDescription = null,
-                tint = color,
+        members.forEachIndexed { index, (profile, color) ->
+            val angle = -PI / 2 + 2 * PI * index / members.size
+            UserAvatar(
+                profile?.avatarUrl,
+                profile?.displayName,
+                size = avatarSize - 10.dp,
                 modifier = Modifier
                     .offset(x = radius * cos(angle).toFloat(), y = radius * sin(angle).toFloat())
-                    .size(avatarSize)
-                    .clip(CircleShape)
-                    .background(VoteCircle),
+                    .background(VoteCircle, CircleShape)
+                    .border(3.dp, color, CircleShape)
+                    .padding(5.dp),
             )
         }
     }
@@ -346,6 +350,7 @@ private fun VoteRoomScreenPreview() {
             polls = listOf(poll),
             votes = listOf(PollVote("p1", "a", true), PollVote("p1", "b", false)),
             members = listOf("a", "b", "c", "d"),
+            memberProfiles = mapOf("a" to Friend("a", "a@uqac.ca", "Jean", "Dupont")),
             selectedPollId = null,
             error = null,
             isVoting = false,
