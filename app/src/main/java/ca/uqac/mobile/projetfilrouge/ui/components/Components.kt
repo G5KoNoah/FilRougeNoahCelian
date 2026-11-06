@@ -268,12 +268,6 @@ fun SwitchRow(
     }
 }
 
-// Avatars par défaut pour count membres
-@Composable
-fun MemberAvatars(count: Int, modifier: Modifier = Modifier) {
-    MemberAvatars(List(count) { null }, modifier)
-}
-
 // Rangée d'avatars des membres
 @Composable
 fun MemberAvatars(members: List<Friend?>, modifier: Modifier = Modifier) {

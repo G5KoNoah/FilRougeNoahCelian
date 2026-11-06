@@ -16,7 +16,6 @@ import ca.uqac.mobile.projetfilrouge.data.FriendRepository
 import ca.uqac.mobile.projetfilrouge.data.PollRepository
 import ca.uqac.mobile.projetfilrouge.data.PollVote
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
-import ca.uqac.mobile.projetfilrouge.data.currentUid
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +36,6 @@ class VoteRoomViewModel(
     private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     private val alarmId: String = checkNotNull(savedStateHandle["alarmId"])
-    val myUid: String? = currentUid
 
     var error by mutableStateOf<String?>(null)
         private set

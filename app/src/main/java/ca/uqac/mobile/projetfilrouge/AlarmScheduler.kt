@@ -16,7 +16,6 @@ class AlarmScheduler (private val context: Context){
     // PendingIntent qui déclenche AlarmReceiver pour cette alarme
     private fun pendingIntent(alarm: SharedAlarm): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("name", alarm.name)
             putExtra(EXTRA_ALARM, Json.encodeToString(SharedAlarm.serializer(), alarm))
         }
         return PendingIntent.getBroadcast(

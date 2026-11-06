@@ -80,7 +80,6 @@ fun AccountScreen(onLogout: () -> Unit) {
             error?.let { Text(it, color = Color.Red, fontWeight = FontWeight.Bold) }
             MainInfo(
                 account = account,
-                uid = accountViewModel.uid,
                 isUploadingAvatar = isUploadingAvatar,
                 onChangeAvatar = {
                     pickPhoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -108,7 +107,6 @@ fun Modifier.cardStyle(): Modifier {
 @Composable
 fun MainInfo(
     account: AccountData?,
-    uid: String?,
     isUploadingAvatar: Boolean,
     onChangeAvatar: () -> Unit,
     onRemoveAvatar: () -> Unit,

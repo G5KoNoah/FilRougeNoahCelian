@@ -97,33 +97,10 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    // Crée une alarme
-    fun createAlarm(alarm: SharedAlarm, onCreated: (String) -> Unit = {}) {
-        val me = _uid.value ?: return
-        launchAction(str(R.string.alarm_error_create)) { onCreated(AlarmRepository.createAlarm(me, alarm)) }
-    }
-
-    // Met à jour les réglages
-    fun updateSettings(alarm: SharedAlarm) =
-        launchAction(str(R.string.alarm_error_update)) { AlarmRepository.updateSettings(alarm) }
-
     // Active ou désactive l'alarme pour moi
     fun setEnabled(alarm: SharedAlarm, enabled: Boolean) {
         val me = _uid.value ?: return
         launchAction(str(R.string.alarm_error_change)) { AlarmRepository.setEnabled(alarm.id, me, enabled) }
-    }
-
-    // Ajoute un membre
-    fun addMember(alarm: SharedAlarm, friendUid: String) =
-        launchAction(str(R.string.alarm_error_add_member)) { AlarmRepository.addMember(alarm.id, friendUid) }
-
-    // Supprime l'alarme si j'en suis propriétaire, sinon la quitte
-    fun leaveOrDelete(alarm: SharedAlarm) {
-        val me = _uid.value ?: return
-        launchAction(str(R.string.alarm_error_remove)) {
-            if (alarm.ownerId == me) AlarmRepository.deleteAlarm(alarm.id)
-            else AlarmRepository.removeMember(alarm.id, me)
-        }
     }
 
     // Lance une action en affichant l'erreur éventuelle

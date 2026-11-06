@@ -5,7 +5,6 @@
     <string name="cancel">Cancel</string>
     <string name="accept">Accept</string>
     <string name="back">Back</string>
-    <string name="logo_uqac">UQAC logo</string>
     <string name="error_no_user">No user signed in</string>
     <string name="error_server">Server error</string>
 
@@ -128,8 +127,6 @@
     <string name="alarm_error_not_found">This alarm no longer exists</string>
     <string name="alarm_error_load">Couldn\'t load the alarm</string>
     <string name="alarm_error_save">Couldn\'t save the alarm</string>
-    <string name="alarm_error_create">Couldn\'t create the alarm</string>
-    <string name="alarm_error_update">Couldn\'t update the alarm</string>
     <string name="alarm_error_change">Couldn\'t change the alarm</string>
     <string name="alarm_error_add_member">Couldn\'t add this member</string>
     <string name="alarm_error_remove">Couldn\'t remove the alarm</string>
@@ -179,7 +176,6 @@
     <string name="vote_progress">%1$d / %2$d votes needed</string>
     <string name="vote_error">Couldn\'t send your vote</string>
     <string name="vote_ringtone">Ringtone: %1$s</string>
-    <string name="vote_snooze">Snooze: %1$s</string>
     <string name="vote_change">%1$s → %2$s</string>
     <string name="vote_setting">%1$s: %2$s</string>
     <string name="vote_on">On</string>

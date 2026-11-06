@@ -119,7 +119,7 @@ class AddContactViewModel(application: Application) : AndroidViewModel(applicati
     fun sendRequest(user: Friend) = runAction(user) { myUid -> FriendRepository.sendRequest(myUid, user.uid) }
 
     // Accepte la demande de cet utilisateur
-    fun acceptRequest(user: Friend) = runAction(user) { myUid -> FriendRepository.acceptRequest(myUid, user.uid) }
+    fun acceptRequest(user: Friend) = runAction(user) { FriendRepository.acceptRequest(user.uid) }
 
     // Exécute une action sur un utilisateur en bloquant les doubles clics
     private fun runAction(user: Friend, action: suspend (String) -> Unit) {

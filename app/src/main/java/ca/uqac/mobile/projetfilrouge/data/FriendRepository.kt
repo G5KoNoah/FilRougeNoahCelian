@@ -107,7 +107,7 @@ object FriendRepository {
     }
 
     // Accepte la demande et crée l'amitié (RPC)
-    suspend fun acceptRequest(myUid: String, fromUid: String) {
+    suspend fun acceptRequest(fromUid: String) {
         supabase.postgrest.rpc("accept_friend_request", buildJsonObject { put("p_from_uid", fromUid) })
     }
 

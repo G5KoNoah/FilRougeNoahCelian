@@ -245,7 +245,7 @@ private fun tabLabel(poll: AlarmPoll): String = when {
     "name" in poll.changes -> poll.changes.text("name").orEmpty()
     "sound" in poll.changes -> stringResource(R.string.alarm_sound)
     "vibrations" in poll.changes -> stringResource(R.string.alarm_vibrations)
-    else -> poll.changes.text("snooze").orEmpty()
+    else -> ""
 }
 
 // « On » ou « Off »
@@ -290,12 +290,6 @@ private fun changeLines(poll: AlarmPoll): List<String> = buildList {
     )
     if ("sound" in poll.changes) add(switchLine(poll, "sound", stringResource(R.string.alarm_sound)))
     if ("vibrations" in poll.changes) add(switchLine(poll, "vibrations", stringResource(R.string.alarm_vibrations)))
-    if ("snooze" in poll.changes) add(
-        stringResource(
-            R.string.vote_snooze,
-            stringResource(R.string.vote_change, poll.previous.text("snooze").orEmpty(), poll.changes.text("snooze").orEmpty()),
-        )
-    )
 }
 
 // Temps restant en m:ss ou h:mm:ss

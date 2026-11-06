@@ -76,10 +76,9 @@ class FriendsViewModel(application: Application) : AndroidViewModel(application)
 
     // Accepte la demande
     fun acceptRequest(request: FriendRequest) {
-        val me = uid ?: return
         viewModelScope.launch {
             try {
-                FriendRepository.acceptRequest(me, request.fromUid)
+                FriendRepository.acceptRequest(request.fromUid)
             } catch (e: Exception) {
                 _error.value = e.localizedMessage ?: str(R.string.contacts_error_accept)
             }

@@ -28,7 +28,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val sound = alarm?.sound ?: true
         val vibrations = alarm?.vibrations ?: true
-        val title = intent.getStringExtra("name")
+        val title = alarm?.name
 
         if (vibrations) AppVibrator(context).alarm()
 
