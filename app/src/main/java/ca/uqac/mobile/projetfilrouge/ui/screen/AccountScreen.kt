@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -83,6 +84,7 @@ fun AccountScreen(onLogout: () -> Unit) {
                 onChangeAvatar = {
                     pickPhoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 },
+                onRemoveAvatar = accountViewModel::removeAvatar,
             )
             OtherInfo(account = account)
             SettingsInfo(onLogout = onLogout)
@@ -106,6 +108,7 @@ fun MainInfo(
     uid: String?,
     isUploadingAvatar: Boolean,
     onChangeAvatar: () -> Unit,
+    onRemoveAvatar: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -118,7 +121,13 @@ fun MainInfo(
             isUploading = isUploadingAvatar,
             onClick = onChangeAvatar,
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        if (account?.avatarUrl != null) {
+            TextButton(onClick = onRemoveAvatar, enabled = !isUploadingAvatar) {
+                Text(stringResource(R.string.avatar_remove), color = MaterialTheme.colorScheme.error)
+            }
+        } else {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(account?.firstName ?: "...", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Text(account?.lastName ?: "...", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)

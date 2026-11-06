@@ -92,6 +92,27 @@ class AccountDetailsViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    // On vide avatar_url d'abord : c'est ce qui fait revenir les initiales.
+    // Si le fichier ne peut pas être supprimé, il sera écrasé au prochain upload.
+    fun removeAvatar() {
+        val userId = uid ?: return
+        if (_isUploadingAvatar.value) return
+        _isUploadingAvatar.value = true
+        _error.value = null
+        viewModelScope.launch {
+            try {
+                supabase.from("accounts").update({ set("avatar_url", null as String?) }) {
+                    filter { eq("id", userId) }
+                }
+                runCatching { supabase.storage.from(AVATAR_BUCKET).delete("$userId/avatar.jpg") }
+            } catch (e: Exception) {
+                _error.value = e.localizedMessage ?: str(R.string.avatar_error)
+            } finally {
+                _isUploadingAvatar.value = false
+            }
+        }
+    }
+
     private fun compressAvatar(uri: Uri): ByteArray {
         val bitmap = decodeScaled(uri) ?: error(str(R.string.avatar_error))
         return ByteArrayOutputStream().use { output ->
