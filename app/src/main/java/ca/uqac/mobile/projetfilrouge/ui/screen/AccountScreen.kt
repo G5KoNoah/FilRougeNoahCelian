@@ -118,7 +118,7 @@ fun MainInfo(
     ) {
         Avatar(
             avatarUrl = account?.avatarUrl,
-            name = account?.let { "${it.firstName} ${it.lastName}".trim().ifEmpty { it.email } },
+            name = account?.displayName,
             isUploading = isUploadingAvatar,
             onClick = onChangeAvatar,
         )

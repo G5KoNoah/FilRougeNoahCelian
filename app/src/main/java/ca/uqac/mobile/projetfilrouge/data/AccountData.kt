@@ -11,4 +11,9 @@ data class AccountData (
     @SerialName("last_name") val lastName: String = "",
     val id: String = "",
     @SerialName("avatar_url") val avatarUrl: String? = null,
-)
+) {
+    val displayName: String get() = displayNameOf(firstName, lastName, email)
+
+    // Profil affichable de ce compte
+    fun toFriend() = Friend(id, email, firstName, lastName, avatarUrl)
+}

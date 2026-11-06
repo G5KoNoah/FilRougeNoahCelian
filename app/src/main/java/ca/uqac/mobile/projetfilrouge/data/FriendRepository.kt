@@ -52,7 +52,7 @@ object FriendRepository {
         }.decodeList<AccountData>()
 
         return found
-            .map { Friend(it.id, it.email, it.firstName, it.lastName, it.avatarUrl) }
+            .map { it.toFriend() }
             .filter { user ->
                 val fields = listOf(user.firstName, user.lastName, user.email).map { it.lowercase() }
                 words.all { word -> fields.any { it.startsWith(word.lowercase()) } }
@@ -65,7 +65,7 @@ object FriendRepository {
         if (uids.isEmpty()) return emptyList()
         return accounts.select { filter { isIn("id", uids) } }
             .decodeList<AccountData>()
-            .map { Friend(it.id, it.email, it.firstName, it.lastName, it.avatarUrl) }
+            .map { it.toFriend() }
             .sortedBy { it.displayName.lowercase() }
     }
 
@@ -100,7 +100,7 @@ object FriendRepository {
             FriendRequestRow(
                 from = fromUid,
                 to = toUid,
-                fromName = "${sender.firstName} ${sender.lastName}".trim(),
+                fromName = sender.displayName,
                 fromEmail = sender.email,
             )
         )

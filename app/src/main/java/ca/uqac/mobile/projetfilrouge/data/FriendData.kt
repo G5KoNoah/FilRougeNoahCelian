@@ -8,7 +8,7 @@ data class Friend(
     val lastName: String,
     val avatarUrl: String? = null,
 ) {
-    val displayName: String get() = "$firstName $lastName".trim().ifEmpty { email }
+    val displayName: String get() = displayNameOf(firstName, lastName, email)
 }
 
 // Demande d'ami reçue
@@ -27,6 +27,10 @@ data class UserSearchResult(
     val user: Friend,
     val status: FriendStatus,
 )
+
+// "Prénom Nom", ou l'email si le nom est vide
+fun displayNameOf(firstName: String, lastName: String, email: String): String =
+    "$firstName $lastName".trim().ifEmpty { email }
 
 // Id d'une demande d'ami
 fun friendRequestId(fromUid: String, toUid: String): String = "${fromUid}_$toUid"
