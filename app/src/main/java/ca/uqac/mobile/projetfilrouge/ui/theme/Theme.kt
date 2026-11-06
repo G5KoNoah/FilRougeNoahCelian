@@ -28,6 +28,7 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = LightTextSecondary,
 )
 
+// Thème Material de l'app, clair ou sombre
 @Composable
 fun ProjetFilRougeTheme(
     darkTheme: Boolean = true,

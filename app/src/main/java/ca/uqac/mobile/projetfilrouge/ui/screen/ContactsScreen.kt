@@ -44,6 +44,7 @@ import ca.uqac.mobile.projetfilrouge.ui.components.ScreenTitle
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 import ca.uqac.mobile.projetfilrouge.viewModel.FriendsViewModel
 
+// Écran des contacts et des demandes reçues
 @Composable
 fun ContactsScreen(onAddContact: () -> Unit) {
     val viewModel: FriendsViewModel = viewModel()
@@ -62,6 +63,7 @@ fun ContactsScreen(onAddContact: () -> Unit) {
     )
 }
 
+// Liste des demandes et des contacts
 @Composable
 private fun ContactsContent(
     friends: List<Friend>,
@@ -125,6 +127,7 @@ private fun ContactsContent(
     }
 }
 
+// Titre de section
 @Composable
 private fun SectionLabel(text: String) {
     Text(
@@ -134,6 +137,7 @@ private fun SectionLabel(text: String) {
     )
 }
 
+// Carte d'un contact
 @Composable
 private fun ContactCard(friend: Friend, onRemove: () -> Unit) {
     AppCard(contentPadding = PaddingValues(0.dp)) {
@@ -162,6 +166,7 @@ private fun ContactCard(friend: Friend, onRemove: () -> Unit) {
     }
 }
 
+// Carte d'une demande reçue
 @Composable
 private fun RequestCard(request: FriendRequest, onAccept: () -> Unit, onDecline: () -> Unit) {
     AppCard {
@@ -182,6 +187,7 @@ private fun RequestCard(request: FriendRequest, onAccept: () -> Unit, onDecline:
     }
 }
 
+// Aperçu de l'écran des contacts
 @Preview(showSystemUi = true)
 @Composable
 private fun ContactsScreenPreview() {

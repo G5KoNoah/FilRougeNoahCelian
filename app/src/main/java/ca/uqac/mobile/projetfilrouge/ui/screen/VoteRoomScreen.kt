@@ -63,6 +63,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
+// Salle de vote d'une alarme
 @Composable
 fun VoteRoomScreen(onBack: () -> Unit = {}) {
     val viewModel: VoteRoomViewModel = viewModel()
@@ -85,6 +86,7 @@ fun VoteRoomScreen(onBack: () -> Unit = {}) {
     )
 }
 
+// Propositions ouvertes, votes des membres et boutons de vote
 @Composable
 private fun VoteRoomContent(
     polls: List<AlarmPoll>,
@@ -98,7 +100,6 @@ private fun VoteRoomContent(
     onSelect: (String) -> Unit,
     onVote: (pollId: String, vote: Boolean) -> Unit,
 ) {
-    // Horloge de l'écran : le temps restant se met à jour chaque seconde
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -107,7 +108,6 @@ private fun VoteRoomContent(
         }
     }
 
-    // On cache les propositions dont le temps est écoulé (la base ne les ferme qu'au prochain vote)
     val openPolls = polls.filter { it.isOpen(now) }
     val selected = openPolls.find { it.id == selectedPollId } ?: openPolls.firstOrNull()
 
@@ -127,7 +127,6 @@ private fun VoteRoomContent(
             return@ScreenLayout
         }
 
-        // Le vote de chaque membre pour la proposition choisie (absent = pas encore voté)
         val pollVotes = votes.filter { it.pollId == selected.id }.associate { it.voterId to it.vote }
         val forCount = pollVotes.values.count { it }
 
@@ -185,6 +184,7 @@ private fun VoteRoomContent(
     }
 }
 
+// Onglets des propositions ouvertes
 @Composable
 private fun ProposalTabs(polls: List<AlarmPoll>, selectedId: String, onSelect: (String) -> Unit) {
     Row(
@@ -208,21 +208,27 @@ private fun ProposalTabs(polls: List<AlarmPoll>, selectedId: String, onSelect: (
     }
 }
 
-// --- Lecture du JSON "changes" / "previous" d'une proposition ---
 
+// Entier à cette clé
 private fun JsonObject.int(key: String): Int? = (this[key] as? JsonPrimitive)?.intOrNull
+// Texte à cette clé
 private fun JsonObject.text(key: String): String? = (this[key] as? JsonPrimitive)?.contentOrNull
+// Booléen à cette clé
 private fun JsonObject.bool(key: String): Boolean? = (this[key] as? JsonPrimitive)?.booleanOrNull
+// Liste d'entiers à cette clé
 private fun JsonObject.intList(key: String): List<Int>? =
     (this[key] as? JsonArray)?.mapNotNull { it.jsonPrimitive.intOrNull }
 
+// Heure au format HH:mm
 private fun timeText(hour: Int?, minute: Int?) = "%02d:%02d".format(hour ?: 0, minute ?: 0)
 
-// Nouvelle heure proposée (les valeurs non modifiées viennent de "previous")
+// Heure proposée
 private fun AlarmPoll.newTime() = timeText(changes.int("hour") ?: previous.int("hour"), changes.int("minute") ?: previous.int("minute"))
+// Heure actuelle
 private fun AlarmPoll.oldTime() = timeText(previous.int("hour"), previous.int("minute"))
 private val AlarmPoll.changesTime get() = "hour" in changes || "minute" in changes
 
+// Libellé des jours
 @Composable
 private fun daysText(days: List<Int>): String {
     val names = stringArrayResource(R.array.day_names_short)
@@ -230,7 +236,7 @@ private fun daysText(days: List<Int>): String {
     else days.sorted().joinToString(", ") { names[it] }
 }
 
-// Libellé court de l'onglet : le changement principal de la proposition
+// Libellé court de l'onglet
 @Composable
 private fun tabLabel(poll: AlarmPoll): String = when {
     poll.changesTime -> poll.newTime()
@@ -242,10 +248,11 @@ private fun tabLabel(poll: AlarmPoll): String = when {
     else -> poll.changes.text("snooze").orEmpty()
 }
 
+// « On » ou « Off »
 @Composable
 private fun onOffText(value: Boolean) = stringResource(if (value) R.string.vote_on else R.string.vote_off)
 
-// "Son : Activé → Désactivé" ; un booléen qui change avait forcément la valeur inverse avant
+// Ligne avant → après pour un réglage on/off
 @Composable
 private fun switchLine(poll: AlarmPoll, key: String, label: String): String {
     val new = poll.changes.bool(key) ?: false
@@ -253,7 +260,7 @@ private fun switchLine(poll: AlarmPoll, key: String, label: String): String {
     return stringResource(R.string.vote_setting, label, stringResource(R.string.vote_change, onOffText(old), onOffText(new)))
 }
 
-// Une ligne "avant → après" par réglage modifié
+// Une ligne avant → après par réglage modifié
 @Composable
 private fun changeLines(poll: AlarmPoll): List<String> = buildList {
     if (poll.changesTime) add(stringResource(R.string.vote_change, poll.oldTime(), poll.newTime()))
@@ -291,7 +298,7 @@ private fun changeLines(poll: AlarmPoll): List<String> = buildList {
     )
 }
 
-// "4:05" (minutes:secondes), ou "1:02:30" au-delà d'une heure
+// Temps restant en m:ss ou h:mm:ss
 private fun remainingText(ms: Long): String {
     val totalSeconds = (ms.coerceAtLeast(0) + 999) / 1000
     val h = totalSeconds / 3600
@@ -300,8 +307,8 @@ private fun remainingText(ms: Long): String {
     return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
 }
 
+// Membres en cercle, entourés de la couleur de leur vote
 @Composable
-// Chaque membre est entouré de la couleur de son vote (pour, contre, pas encore voté)
 private fun VoteCircle(members: List<Pair<Friend?, Color>>, modifier: Modifier = Modifier) {
     BoxWithConstraints(
         modifier = modifier
@@ -335,6 +342,7 @@ private fun VoteCircle(members: List<Pair<Friend?, Color>>, modifier: Modifier =
     }
 }
 
+// Aperçu de la salle de vote
 @Preview(showSystemUi = true)
 @Composable
 private fun VoteRoomScreenPreview() {

@@ -27,15 +27,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-// Salle de vote d'une alarme : les propositions ouvertes et les votes des membres, en direct
+// Propositions et votes d'une alarme, en direct
 class VoteRoomViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
+    // Texte traduit depuis les ressources
     private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
-    // Vient de la route "voteRoom/{alarmId}"
     private val alarmId: String = checkNotNull(savedStateHandle["alarmId"])
     val myUid: String? = currentUid
 
@@ -45,12 +45,10 @@ class VoteRoomViewModel(
     var isVoting by mutableStateOf(false)
         private set
 
-    // L'alarme, pour connaître ses membres (le cercle) et ses valeurs actuelles
     val alarm: StateFlow<SharedAlarm?> = AlarmRepository.observeAlarm(alarmId)
         .catch { e -> error = e.localizedMessage ?: str(R.string.error_server) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    // Profils des membres, pour afficher leur photo (ou leurs initiales) dans le cercle
     @OptIn(ExperimentalCoroutinesApi::class)
     val memberProfiles: StateFlow<Map<String, Friend>> = alarm
         .map { it?.members.orEmpty() }
@@ -59,13 +57,11 @@ class VoteRoomViewModel(
         .map { profiles -> profiles.associateBy { it.uid } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    // Les propositions encore ouvertes ; celles dont le temps est écoulé sont filtrées à l'écran (isOpen(now))
     val polls: StateFlow<List<AlarmPoll>> = PollRepository.observePolls(alarmId)
         .map { list -> list.filter { it.status == "open" }.sortedBy { it.endsAtMs } }
         .catch { e -> error = e.localizedMessage ?: str(R.string.error_server) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Les votes des propositions affichées : on se réabonne seulement quand la liste des propositions change
     @OptIn(ExperimentalCoroutinesApi::class)
     val votes: StateFlow<List<PollVote>> = polls
         .map { list -> list.map { it.id } }
@@ -74,21 +70,21 @@ class VoteRoomViewModel(
         .catch { e -> error = e.localizedMessage ?: str(R.string.error_server) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Onglet choisi (null = le premier)
     var selectedPollId by mutableStateOf<String?>(null)
         private set
 
+    // Sélectionne l'onglet
     fun selectPoll(id: String) {
         selectedPollId = id
     }
 
+    // Envoie mon vote
     fun vote(pollId: String, vote: Boolean) {
         if (isVoting) return
         isVoting = true
         error = null
         viewModelScope.launch {
             try {
-                // poll_vote (SQL) applique le changement à l'alarme si la majorité est atteinte
                 PollRepository.vote(pollId, vote)
             } catch (e: Exception) {
                 error = e.localizedMessage ?: str(R.string.vote_error)

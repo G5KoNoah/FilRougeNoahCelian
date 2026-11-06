@@ -25,9 +25,10 @@ import kotlinx.coroutines.launch
 import ca.uqac.mobile.projetfilrouge.data.Friend
 import ca.uqac.mobile.projetfilrouge.data.FriendRepository
 
+// Alarmes de l'utilisateur, profils des membres et votes en cours
 class SharedAlarmsViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    // Texte traduit depuis les ressources
     private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     private val _uid = MutableStateFlow<String?>(null)
@@ -36,7 +37,6 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
     private val _alarms = MutableStateFlow<List<SharedAlarm>>(emptyList())
     val alarms: StateFlow<List<SharedAlarm>> = _alarms.asStateFlow()
 
-    // Profils des membres de mes alarmes, mis à jour en direct (photo changée, retirée...)
     @OptIn(ExperimentalCoroutinesApi::class)
     val memberProfiles: StateFlow<Map<String, Friend>> = _alarms
         .map { alarms -> alarms.flatMap { it.members }.distinct().sorted() }
@@ -45,7 +45,6 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
         .map { profiles -> profiles.associateBy { it.uid } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    // Votes ouverts sur mes alarmes : sert au compteur "votes en cours" de chaque carte
     private val _openPolls = MutableStateFlow<List<AlarmPoll>>(emptyList())
     val openPolls: StateFlow<List<AlarmPoll>> = _openPolls.asStateFlow()
 
@@ -60,6 +59,7 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch { uidChanges.collect { onUserChanged(it) } }
     }
 
+    // Relance les écoutes pour le nouvel utilisateur
     private fun onUserChanged(newUid: String?) {
         if (newUid == _uid.value && newUid != null) return
 
@@ -85,7 +85,7 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    // On ne se réabonne que si la liste des alarmes change (pas à chaque modification d'une alarme)
+    // Écoute les votes ouverts de ces alarmes si la liste a changé
     private fun observePollsOf(alarmIds: List<String>) {
         if (alarmIds == watchedAlarmIds) return
         watchedAlarmIds = alarmIds
@@ -97,22 +97,27 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    // Crée une alarme
     fun createAlarm(alarm: SharedAlarm, onCreated: (String) -> Unit = {}) {
         val me = _uid.value ?: return
         launchAction(str(R.string.alarm_error_create)) { onCreated(AlarmRepository.createAlarm(me, alarm)) }
     }
 
+    // Met à jour les réglages
     fun updateSettings(alarm: SharedAlarm) =
         launchAction(str(R.string.alarm_error_update)) { AlarmRepository.updateSettings(alarm) }
 
+    // Active ou désactive l'alarme pour moi
     fun setEnabled(alarm: SharedAlarm, enabled: Boolean) {
         val me = _uid.value ?: return
         launchAction(str(R.string.alarm_error_change)) { AlarmRepository.setEnabled(alarm.id, me, enabled) }
     }
 
+    // Ajoute un membre
     fun addMember(alarm: SharedAlarm, friendUid: String) =
         launchAction(str(R.string.alarm_error_add_member)) { AlarmRepository.addMember(alarm.id, friendUid) }
 
+    // Supprime l'alarme si j'en suis propriétaire, sinon la quitte
     fun leaveOrDelete(alarm: SharedAlarm) {
         val me = _uid.value ?: return
         launchAction(str(R.string.alarm_error_remove)) {
@@ -121,6 +126,7 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    // Lance une action en affichant l'erreur éventuelle
     private fun launchAction(errorMessage: String, action: suspend () -> Unit) {
         viewModelScope.launch {
             try {

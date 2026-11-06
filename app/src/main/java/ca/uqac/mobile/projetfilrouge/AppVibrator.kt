@@ -8,11 +8,9 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 
+// Vibrations de l'app, via l'applicationContext pour pouvoir les arrêter de partout
 class AppVibrator(context: Context) {
 
-    // Toujours via applicationContext : chaque Context a son propre Vibrator, et cancel() n'arrête que
-    // les vibrations lancées par le même. Ainsi stop() (depuis MainActivity ou StopAlarmReceiver)
-    // arrête bien la vibration lancée par AlarmReceiver.
     private val vibrator: Vibrator? = context.applicationContext.let { app ->
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             app.getSystemService(VibratorManager::class.java)?.defaultVibrator
@@ -24,18 +22,16 @@ class AppVibrator(context: Context) {
 
     private val peutVibrer: Boolean get() = vibrator?.hasVibrator() == true
 
-    // Petite vibration courte, pour un retour au toucher
+    // Vibration courte au toucher (Android 10+)
     fun click() {
         val v = vibrator ?: return
         if (!peutVibrer) return
-        // createPredefined n'existe qu'à partir d'Android 10 (API 29) : sans ce test, l'app plante avant
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
         }
     }
 
-    // Vibration d'alarme : 800 ms de vibration, 400 ms de pause, pendant durationMs puis elle s'arrête seule.
-    // Usage "alarme" : le système la laisse passer même en mode silencieux / Ne pas déranger,
+    // Vibration d'alarme répétée pendant durationMs, même en mode silencieux
     fun alarm(durationMs: Long = ALARM_DURATION_MS) {
         val v = vibrator ?: return
         if (!peutVibrer) return
@@ -68,7 +64,7 @@ class AppVibrator(context: Context) {
         }
     }
 
-    // Arrête la vibration en cours (celles lancées par l'application)
+    // Arrête la vibration en cours
     fun stop() {
         vibrator?.cancel()
     }
@@ -76,6 +72,6 @@ class AppVibrator(context: Context) {
     private companion object {
         const val VIBRATE_MS = 800L
         const val PAUSE_MS = 400L
-        const val ALARM_DURATION_MS = 60_000L   // 1 minute maximum
+        const val ALARM_DURATION_MS = 60_000L
     }
 }

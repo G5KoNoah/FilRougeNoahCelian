@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
+// Ligne de la table friend_requests
 @Serializable
 private data class FriendRequestRow(
     @SerialName("from_uid") val from: String,
@@ -16,23 +17,25 @@ private data class FriendRequestRow(
     @SerialName("from_email") val fromEmail: String = "",
 )
 
+// Ligne de la table friendships
 @Serializable
 private data class FriendshipRow(
     @SerialName("user_a") val userA: String,
     @SerialName("user_b") val userB: String,
 )
 
+// Accès aux comptes, demandes d'ami et amitiés
 object FriendRepository {
 
     private val accounts get() = supabase.from("accounts")
     private val friendRequests get() = supabase.from("friend_requests")
     private val friendships get() = supabase.from("friendships")
 
+    // Comptes dont le prénom, le nom ou l'email commence par chaque mot recherché
     suspend fun searchUsers(query: String, excludeUid: String): List<Friend> {
         val words = query.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
         if (words.isEmpty()) return emptyList()
 
-        // ilike est insensible à la casse ; on retire les caractères spéciaux de PostgREST / LIKE
         val prefix = words.first().replace(Regex("""[,()%_*\\"]"""), "")
         if (prefix.isEmpty()) return emptyList()
 
@@ -57,6 +60,7 @@ object FriendRepository {
             .sortedBy { it.displayName.lowercase() }
     }
 
+    // Profils de ces utilisateurs, triés par nom
     suspend fun getFriends(uids: List<String>): List<Friend> {
         if (uids.isEmpty()) return emptyList()
         return accounts.select { filter { isIn("id", uids) } }
@@ -65,27 +69,30 @@ object FriendRepository {
             .sortedBy { it.displayName.lowercase() }
     }
 
-    // Se relance quand un compte change (photo, nom...) : les avatars se mettent à jour partout
+    // Profils de ces utilisateurs, mis à jour à chaque changement de accounts
     fun observeProfiles(uids: List<String>): Flow<List<Friend>> = observeTable("accounts") { getFriends(uids) }
 
-    // RLS : on ne reçoit que les amitiés dont on fait partie
+    // Uids de mes amis, en direct
     fun observeFriendUids(myUid: String): Flow<List<String>> = observeTable("friendships") {
         friendships.select().decodeList<FriendshipRow>()
             .map { if (it.userA == myUid) it.userB else it.userA }
     }
 
+    // Demandes d'ami reçues, en direct
     fun observeReceivedRequests(myUid: String): Flow<List<FriendRequest>> = observeTable("friend_requests") {
         friendRequests.select { filter { eq("to_uid", myUid) } }
             .decodeList<FriendRequestRow>()
             .map { FriendRequest(friendRequestId(it.from, it.to), it.from, it.fromName, it.fromEmail) }
     }
 
+    // Uids des utilisateurs à qui j'ai envoyé une demande, en direct
     fun observeSentRequestUids(myUid: String): Flow<List<String>> = observeTable("friend_requests") {
         friendRequests.select { filter { eq("from_uid", myUid) } }
             .decodeList<FriendRequestRow>()
             .map { it.to }
     }
 
+    // Envoie une demande d'ami
     suspend fun sendRequest(fromUid: String, toUid: String) {
         val sender = accounts.select { filter { eq("id", fromUid) } }
             .decodeSingleOrNull<AccountData>() ?: AccountData()
@@ -99,11 +106,12 @@ object FriendRepository {
         )
     }
 
-    // Supprime la demande et crée l'amitié dans une seule transaction (fonction SQL)
+    // Accepte la demande et crée l'amitié (RPC)
     suspend fun acceptRequest(myUid: String, fromUid: String) {
         supabase.postgrest.rpc("accept_friend_request", buildJsonObject { put("p_from_uid", fromUid) })
     }
 
+    // Refuse la demande
     suspend fun declineRequest(myUid: String, fromUid: String) {
         friendRequests.delete {
             filter {
@@ -113,6 +121,7 @@ object FriendRepository {
         }
     }
 
+    // Supprime l'amitié
     suspend fun removeFriend(myUid: String, friendUid: String) {
         val (a, b) = listOf(myUid, friendUid).sorted()
         friendships.delete {

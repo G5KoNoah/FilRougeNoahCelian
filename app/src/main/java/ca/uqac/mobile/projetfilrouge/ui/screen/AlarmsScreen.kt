@@ -61,10 +61,9 @@ import java.util.Calendar
 import ca.uqac.mobile.projetfilrouge.viewModel.SharedAlarmsViewModel
 import kotlinx.coroutines.delay
 
+// Écran de la liste des alarmes
 @Composable
 fun AlarmsScreen(onAlarmEdit: (String?) -> Unit, onVoteRoom: (String) -> Unit) {
-    // Android 13+ : sans cette permission, la notification de l'alarme ne s'affiche pas.
-    // Demandée une seule fois, à l'ouverture de l'écran.
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= 33) launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -90,6 +89,7 @@ fun AlarmsScreen(onAlarmEdit: (String?) -> Unit, onVoteRoom: (String) -> Unit) {
     )
 }
 
+// Prochaine alarme et liste des alarmes
 @Composable
 private fun AlarmsContent(
     alarms: List<SharedAlarm>,
@@ -109,12 +109,10 @@ private fun AlarmsContent(
             now = System.currentTimeMillis()
         }
     }
-    // L'alarme activée qui sonnera en premier, avec l'instant où elle sonnera
     val nextAlarm = alarms
         .filter { it.isEnabledFor(myUid) }
         .map { it to AlarmScheduler.nextOccurrence(it.hour, it.minute, it.days, now) }
         .minByOrNull { it.second }
-    // Nombre de votes encore ouverts par alarme
     val openVoteCounts = openPolls.filter { it.isOpen(now) }.groupingBy { it.alarmId }.eachCount()
 
     ScreenLayout {
@@ -161,6 +159,7 @@ private fun AlarmsContent(
     }
 }
 
+// Carte d'une alarme
 @Composable
 private fun AlarmCard(
     alarm: SharedAlarm,
@@ -198,8 +197,7 @@ private fun AlarmCard(
     }
 }
 
-// Pastille "2 votes en cours" : visible même si l'alarme est désactivée pour moi.
-// La toucher ouvre la salle de vote (et non l'écran d'édition comme le reste de la carte).
+// Pastille des votes en cours, qui ouvre la salle de vote
 @Composable
 private fun OpenVotesBadge(count: Int, onClick: () -> Unit) {
     Row(
@@ -227,6 +225,7 @@ private fun OpenVotesBadge(count: Int, onClick: () -> Unit) {
     }
 }
 
+// Libellé des jours de répétition
 @Composable
 private fun daysLabel(days: List<Int>): String {
     val dayNames = stringArrayResource(R.array.day_names_short)
@@ -238,6 +237,7 @@ private fun daysLabel(days: List<Int>): String {
     }
 }
 
+// Carte de la prochaine alarme qui sonnera
 @Composable
 private fun NextAlarmCard(next: Pair<SharedAlarm, Long>?, hasAlarms: Boolean, nowMillis: Long) {
     AppCard(contentPadding = PaddingValues(24.dp)) {
@@ -253,7 +253,6 @@ private fun NextAlarmCard(next: Pair<SharedAlarm, Long>?, hasAlarms: Boolean, no
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
             )
-            // Sans alarme du tout, le message sous la carte invite déjà à en créer une
             if (hasAlarms) {
                 Text(
                     stringResource(R.string.alarms_all_disabled),
@@ -294,7 +293,7 @@ private fun NextAlarmCard(next: Pair<SharedAlarm, Long>?, hasAlarms: Boolean, no
     }
 }
 
-// "Aujourd'hui", "Demain", sinon le nom du jour
+// « Aujourd'hui », « Demain » ou le nom du jour
 @Composable
 private fun dayLabel(targetMillis: Long, nowMillis: Long): String {
     fun midnight(millis: Long) = Calendar.getInstance().apply {
@@ -305,7 +304,6 @@ private fun dayLabel(targetMillis: Long, nowMillis: Long): String {
         set(Calendar.MILLISECOND, 0)
     }
     val target = midnight(targetMillis)
-    // Arrondi : un changement d'heure (été / hiver) donne une journée de 23 h ou 25 h
     val dayDiff = Math.round((target.timeInMillis - midnight(nowMillis).timeInMillis) / 86_400_000.0)
     return when (dayDiff) {
         0L -> stringResource(R.string.alarms_today)
@@ -314,14 +312,13 @@ private fun dayLabel(targetMillis: Long, nowMillis: Long): String {
     }
 }
 
-// "dans 2 heures et 5 minutes", "dans 3 jours et 1 heure", "dans 10 minutes" : on n'affiche pas les unités à 0
+// Temps restant avant la sonnerie, sans les unités à 0
 @Composable
 private fun untilText(targetMillis: Long, nowMillis: Long): String {
     val totalMinutes = (targetMillis - nowMillis + 59_999) / 60_000
     val days = totalMinutes / (24 * 60)
     val hours = (totalMinutes / 60) % 24
     val minutes = totalMinutes % 60
-    // pluralStringResource choisit "1 hour" / "2 hours" (ou "1 heure" / "2 heures") selon la langue
     @Composable
     fun plural(@PluralsRes id: Int, value: Long) = pluralStringResource(id, value.toInt(), value.toInt())
     val parts = buildList {
@@ -335,6 +332,7 @@ private fun untilText(targetMillis: Long, nowMillis: Long): String {
     }
 }
 
+// Aperçu de la liste des alarmes
 @Preview(showSystemUi = true)
 @Composable
 private fun AlarmsScreenPreview() {

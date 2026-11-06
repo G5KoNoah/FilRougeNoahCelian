@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
+// Écran d'inscription
 @Composable
 fun SignScreen(onLogin: () -> Unit) {
     AuthLayout {
@@ -49,6 +50,7 @@ fun SignScreen(onLogin: () -> Unit) {
 }
 
 
+// Formulaire d'inscription Supabase
 @Composable
 fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
     var emailText by rememberSaveable() { mutableStateOf("") }
@@ -130,7 +132,6 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
 
         Button(
             onClick = {
-                // Vérifications avant d'appeler Supabase
                 val erreur = when {
                     emailText.isBlank() -> context.getString(R.string.sign_error_email)
                     passwordText.length < 6 -> context.getString(R.string.sign_error_password_length)
@@ -147,7 +148,6 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
                 message = null
                 scope.launch {
                     try {
-                        // La ligne "accounts" est créée par un trigger SQL à partir de ces métadonnées
                         supabase.auth.signUpWith(Email) {
                             email = emailText.trim()
                             password = passwordText
@@ -160,7 +160,6 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
                         message = context.getString(R.string.sign_success)
                         onLogin()
                     } catch (e: Exception) {
-                        // Erreur (email déjà utilisé, mail invalide...)
                         isError = true
                         message = e.localizedMessage ?: context.getString(R.string.sign_error)
                     } finally {

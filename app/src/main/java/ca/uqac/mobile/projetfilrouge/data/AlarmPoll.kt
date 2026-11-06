@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import kotlin.collections.emptyMap
 
+// Proposition de changement d'une alarme, soumise au vote
 @Serializable
 data class AlarmPoll(
     val id: String = "",
@@ -16,9 +17,11 @@ data class AlarmPoll(
     @SerialName("required_votes") val requiredVotes: Int = 1,
     @SerialName("ends_at_ms") val endsAtMs: Long = 0,
 ) {
+    // Vrai si le vote est ouvert et pas encore expiré
     fun isOpen(now: Long) = status == "open" && now < endsAtMs
 }
 
+// Vote d'un membre sur une proposition
 @Serializable
 data class PollVote(
     @SerialName("poll_id") val pollId: String = "",

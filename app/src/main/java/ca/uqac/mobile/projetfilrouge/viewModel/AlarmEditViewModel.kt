@@ -30,15 +30,14 @@ import ca.uqac.mobile.projetfilrouge.data.RingtoneRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+// État de l'écran d'édition d'une alarme
 class AlarmEditViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
-    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    // Texte traduit depuis les ressources
     private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
-    // l'alarme telle qu'elle était à l'ouverture de l'écran
-    // (état Compose : needsVote et canStartPoll se mettent à jour à l'écran quand l'alarme est chargée)
     private var original by mutableStateOf<SharedAlarm?>(null)
     val pollDurations = listOf("2 min", "5 min", "10 min")
 
@@ -93,7 +92,6 @@ class AlarmEditViewModel(
     var pollDuration by mutableStateOf<String?>(null)
         private set
 
-    // Mes contacts : ce sont les seules personnes qu'on peut ajouter à l'alarme
     var friends by mutableStateOf<List<Friend>>(emptyList())
         private set
 
@@ -119,6 +117,7 @@ class AlarmEditViewModel(
         }
     }
 
+    // Remplit l'écran avec l'alarme chargée
     private fun fill(alarm: SharedAlarm) {
         ownerId = alarm.ownerId
         hour = alarm.hour
@@ -136,6 +135,7 @@ class AlarmEditViewModel(
 
     private var memberProfilesJob: Job? = null
 
+    // Écoute les profils des membres
     private fun loadMemberProfiles(uids: List<String>) {
         memberProfilesJob?.cancel()
         memberProfilesJob = viewModelScope.launch {
@@ -145,32 +145,40 @@ class AlarmEditViewModel(
         }
     }
 
+    // Profil d'un membre
     fun profileOf(uid: String): Friend? = memberProfiles[uid] ?: friends.find { it.uid == uid }
 
+    // Change l'heure
     fun onHourChange(value: Int) {
         hour = value
     }
 
+    // Change les minutes
     fun onMinuteChange(value: Int) {
         minute = value
     }
 
+    // Ajoute ou retire un jour
     fun toggleDay(day: Int) {
         days = if (day in days) days - day else days + day
     }
 
+    // Change le nom
     fun onNameChange(value: String) {
         name = value
     }
 
+    // Revient à la sonnerie par défaut
     fun clearRingtone() {
         ringtone = null
         ringtoneUrl = null
     }
 
+    // Nom de la sonnerie, vide si c'est celle par défaut
     private fun savedRingtone(alarm: SharedAlarm): String =
         if (alarm.ringtoneUrl == null) "" else alarm.ringtone
 
+    // Vérifie et envoie un MP3 ou WAV comme sonnerie
     fun uploadRingtone(uri: Uri) {
         val me = myUid ?: return
         if (isUploadingRingtone) return
@@ -201,23 +209,28 @@ class AlarmEditViewModel(
         }
     }
 
+    // Nom du fichier choisi
     private fun displayName(uri: Uri): String? =
         getApplication<Application>().contentResolver
             .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
             ?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
 
+    // Active ou coupe le son
     fun onSoundChange(value: Boolean) {
         sound = value
     }
 
+    // Active ou coupe les vibrations
     fun onVibrationsChange(value: Boolean) {
         vibrations = value
     }
 
+    // Choisit la durée du vote
     fun onPollDurationSelected(value: String) {
         pollDuration = value
     }
 
+    // Charge mes contacts
     private fun loadFriends() {
         val me = myUid ?: return
         viewModelScope.launch {
@@ -229,30 +242,30 @@ class AlarmEditViewModel(
         }
     }
 
+    // Ouvre le choix des membres
     fun openMemberPicker() {
         showMemberPicker = true
     }
 
+    // Ferme le choix des membres
     fun closeMemberPicker() {
         showMemberPicker = false
     }
 
-    // Les membres déjà enregistrés ne se retirent pas ici (c'est "Quitter" / "Supprimer") :
-    // on ne coche / décoche que les nouveaux, qui seront ajoutés au Save
+    // Vrai si le membre est déjà enregistré, donc non décochable
     fun isSavedMember(uid: String): Boolean = uid == ownerId || uid in original?.members.orEmpty()
 
-    // Membres cochés mais pas encore enregistrés
     val newMembers: List<String> get() = members - original?.members.orEmpty().toSet()
 
+    // Coche ou décoche un nouveau membre
     fun toggleMember(uid: String) {
         if (isSavedMember(uid)) return
         members = if (uid in members) members - uid else members + uid
     }
 
-    // Alarme seule (ou nouvelle) : on enregistre directement tous les réglages
+    // Enregistre l'alarme, ou seulement les membres si elle est partagée
     fun save(onDone: () -> Unit) {
         val me = myUid ?: return
-        // Alarme partagée : les réglages passent par un vote, Save n'ajoute que les membres
         if (needsVote) return saveMembers()
         launchSaving(str(R.string.alarm_error_save)) {
             val alarm = SharedAlarm(
@@ -277,7 +290,7 @@ class AlarmEditViewModel(
         }
     }
 
-    // Alarme partagée : ajoute les membres cochés, sans toucher aux réglages (qui se votent)
+    // Ajoute les nouveaux membres sans toucher aux réglages
     fun saveMembers() {
         val id = alarmId ?: return
         val added = newMembers
@@ -288,6 +301,7 @@ class AlarmEditViewModel(
         }
     }
 
+    // Supprime l'alarme si j'en suis propriétaire, sinon la quitte
     fun deleteOrLeave(onDone: () -> Unit) {
         val me = myUid ?: return
         val id = alarmId ?: return
@@ -297,6 +311,7 @@ class AlarmEditViewModel(
         }
     }
 
+    // Lance une sauvegarde avec indicateur de chargement et gestion d'erreur
     private fun launchSaving(errorMessage: String, block: suspend () -> Unit) {
         if (isSaving) return
         isSaving = true
@@ -313,10 +328,9 @@ class AlarmEditViewModel(
     }
 
 
-    // Une alarme à plusieurs membres demande un vote pour tous ses réglages
     val needsVote: Boolean get() = (original?.members?.size ?: 0) > 1
 
-    // Seulement les réglages votables qui ont changé
+    // Réglages modifiés à soumettre au vote
     fun votedChanges(): JsonObject {
         val o = original ?: return JsonObject(emptyMap())
         return buildJsonObject {
@@ -335,13 +349,13 @@ class AlarmEditViewModel(
         }
     }
 
-    // Le bouton "Start poll" n'est actif que s'il y a quelque chose à voter et une durée choisie
     val canStartPoll: Boolean
         get() = !isNew && needsVote && pollDuration != null && votedChanges().isNotEmpty()
 
+    // Crée le vote avec les réglages modifiés
     fun startPoll(onCreated: () -> Unit) {
         val id = alarmId ?: return
-        val minutes = pollDuration?.substringBefore(" ")?.toIntOrNull() ?: return   // "5 min" -> 5
+        val minutes = pollDuration?.substringBefore(" ")?.toIntOrNull() ?: return
         launchSaving(str(R.string.alarm_error_poll)) {
             PollRepository.createPoll(id, votedChanges(), minutes)
             onCreated()

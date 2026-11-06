@@ -18,9 +18,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+// Contacts et demandes d'ami de l'utilisateur connecté
 class FriendsViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    // Texte traduit depuis les ressources
     private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     private var uid: String? = null
@@ -35,12 +36,12 @@ class FriendsViewModel(application: Application) : AndroidViewModel(application)
     val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
-        // collectLatest annule les écoutes de l'ancien utilisateur à chaque connexion / déconnexion
         viewModelScope.launch {
             uidChanges.collectLatest { onUserChanged(it) }
         }
     }
 
+    // Relance les écoutes pour le nouvel utilisateur
     private suspend fun onUserChanged(newUid: String?) {
         uid = newUid
         _friends.value = emptyList()
@@ -73,6 +74,7 @@ class FriendsViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // Accepte la demande
     fun acceptRequest(request: FriendRequest) {
         val me = uid ?: return
         viewModelScope.launch {
@@ -84,6 +86,7 @@ class FriendsViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // Refuse la demande
     fun declineRequest(request: FriendRequest) {
         val me = uid ?: return
         viewModelScope.launch {
@@ -95,6 +98,7 @@ class FriendsViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // Supprime le contact
     fun removeFriend(friend: Friend) {
         val me = uid ?: return
         viewModelScope.launch {

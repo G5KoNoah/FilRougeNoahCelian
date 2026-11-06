@@ -17,14 +17,17 @@ import androidx.core.content.ContextCompat
 import ca.uqac.mobile.projetfilrouge.data.RingtoneRepository
 import ca.uqac.mobile.projetfilrouge.receiver.AlarmReceiver
 
+// Service au premier plan qui joue la sonnerie en boucle
 class AlarmSoundService : Service() {
 
     private var player: MediaPlayer? = null
     private val handler = Handler(Looper.getMainLooper())
     private val autoStop = Runnable { stopSelf() }
 
+    // Service non lié
     override fun onBind(intent: Intent?): IBinder? = null
 
+    // Passe au premier plan et lance la sonnerie, coupée après MAX_RING_MS
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val title = intent?.getStringExtra(EXTRA_TITLE)
         ServiceCompat.startForeground(
@@ -40,6 +43,7 @@ class AlarmSoundService : Service() {
         return START_NOT_STICKY
     }
 
+    // Joue la sonnerie : fichier local, puis URL, puis sonnerie système
     private fun play(ringtoneUrl: String?) {
         releasePlayer()
         val candidates = buildList {
@@ -54,6 +58,7 @@ class AlarmSoundService : Service() {
         player = candidates.firstNotNullOfOrNull { uri -> runCatching { startPlayer(uri) }.getOrNull() }
     }
 
+    // Démarre un MediaPlayer en boucle sur cet uri
     private fun startPlayer(uri: Uri): MediaPlayer {
         val mediaPlayer = MediaPlayer()
         try {
@@ -74,6 +79,7 @@ class AlarmSoundService : Service() {
         }
     }
 
+    // Arrête et libère le lecteur
     private fun releasePlayer() {
         player?.run {
             runCatching { stop() }
@@ -82,6 +88,7 @@ class AlarmSoundService : Service() {
         player = null
     }
 
+    // Coupe le son et retire la notification
     override fun onDestroy() {
         handler.removeCallbacks(autoStop)
         releasePlayer()
@@ -94,6 +101,7 @@ class AlarmSoundService : Service() {
         private const val EXTRA_RINGTONE_URL = "ringtone_url"
         private const val MAX_RING_MS = 5 * 60_000L
 
+        // Démarre le service avec la sonnerie de l'alarme
         fun start(context: Context, title: String?, ringtoneUrl: String?) {
             val intent = Intent(context, AlarmSoundService::class.java)
                 .putExtra(EXTRA_TITLE, title)
@@ -101,6 +109,7 @@ class AlarmSoundService : Service() {
             ContextCompat.startForegroundService(context, intent)
         }
 
+        // Arrête le service
         fun stop(context: Context) {
             context.stopService(Intent(context, AlarmSoundService::class.java))
         }

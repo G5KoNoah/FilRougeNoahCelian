@@ -9,6 +9,7 @@ import java.io.File
 import java.net.URL
 import java.util.UUID
 
+// Upload des sonneries et cache local
 object RingtoneRepository {
 
     const val MAX_SIZE_BYTES = 5 * 1024 * 1024
@@ -27,8 +28,10 @@ object RingtoneRepository {
 
     val acceptedMimeTypes: Array<String> get() = extensions.keys.toTypedArray()
 
+    // Extension pour ce type MIME, null s'il n'est pas supporté
     fun extensionFor(mimeType: String?): String? = extensions[mimeType?.lowercase()]
 
+    // Envoie la sonnerie dans le bucket et renvoie son URL publique
     suspend fun upload(ownerUid: String, bytes: ByteArray, mimeType: String): String {
         val extension = extensionFor(mimeType) ?: error("Unsupported audio type: $mimeType")
         val path = "$ownerUid/${UUID.randomUUID()}.$extension"
@@ -39,12 +42,14 @@ object RingtoneRepository {
         return bucket.publicUrl(path)
     }
 
+    // Fichier du cache local pour cette URL
     fun localFile(context: Context, url: String): File {
         val extension = url.substringBefore('?').substringAfterLast('.', "mp3")
         val name = "${url.hashCode().toUInt()}.$extension"
         return File(File(context.filesDir, CACHE_DIR), name)
     }
 
+    // Télécharge la sonnerie dans le cache si elle n'y est pas
     suspend fun download(context: Context, url: String) = withContext(Dispatchers.IO) {
         val target = localFile(context, url)
         if (target.exists()) return@withContext
@@ -54,6 +59,7 @@ object RingtoneRepository {
         temp.renameTo(target)
     }
 
+    // Supprime du cache les sonneries qui ne sont plus utilisées
     fun keepOnly(context: Context, urls: Collection<String>) {
         val keep = urls.map { localFile(context, it).name }.toSet()
         File(context.filesDir, CACHE_DIR).listFiles()

@@ -9,20 +9,23 @@ import ca.uqac.mobile.projetfilrouge.receiver.AlarmReceiver
 import kotlinx.serialization.json.Json
 import java.util.Calendar
 
+// Planifie et annule les alarmes dans l'AlarmManager
 class AlarmScheduler (private val context: Context){
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
+    // PendingIntent qui déclenche AlarmReceiver pour cette alarme
     private fun pendingIntent(alarm: SharedAlarm): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("name", alarm.name)
             putExtra(EXTRA_ALARM, Json.encodeToString(SharedAlarm.serializer(), alarm))
         }
         return PendingIntent.getBroadcast(
-            context, alarm.requestCode, intent,       // id = requestCode
+            context, alarm.requestCode, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
+    // Programme la prochaine sonnerie de l'alarme
     fun schedule(alarm: SharedAlarm) {
         val triggerAt = nextOccurrence(alarm.hour, alarm.minute, alarm.days)
         val showIntent = PendingIntent.getActivity(
@@ -39,11 +42,13 @@ class AlarmScheduler (private val context: Context){
         }
     }
 
+    // Annule l'alarme programmée
     fun cancel(alarm: SharedAlarm) = alarmManager.cancel(pendingIntent(alarm))
 
     companion object {
         const val EXTRA_ALARM = "alarm"
 
+        // Prochain instant (ms) où l'alarme doit sonner selon ses jours
         fun nextOccurrence(hour: Int, minute: Int, days: List<Int>, fromMillis: Long = System.currentTimeMillis()): Long {
             for (offset in 0..7) {
                 val candidate = Calendar.getInstance().apply {

@@ -56,6 +56,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
 import ca.uqac.mobile.projetfilrouge.ui.components.UserAvatar
 
+// Écran du profil : avatar, infos et réglages
 @Composable
 fun AccountScreen(onLogout: () -> Unit) {
     val accountViewModel: AccountDetailsViewModel = viewModel()
@@ -92,6 +93,7 @@ fun AccountScreen(onLogout: () -> Unit) {
     }
 }
 
+// Style des cartes du profil
 @Composable
 fun Modifier.cardStyle(): Modifier {
     val forme = RoundedCornerShape(16.dp)
@@ -102,6 +104,7 @@ fun Modifier.cardStyle(): Modifier {
         .padding(24.dp)
 }
 
+// Carte avec l'avatar et le nom
 @Composable
 fun MainInfo(
     account: AccountData?,
@@ -135,6 +138,7 @@ fun MainInfo(
     }
 }
 
+// Avatar cliquable pour changer la photo
 @Composable
 private fun Avatar(avatarUrl: String?, name: String?, isUploading: Boolean, onClick: () -> Unit) {
     Box(
@@ -165,19 +169,20 @@ private fun Avatar(avatarUrl: String?, name: String?, isUploading: Boolean, onCl
     }
 }
 
+// Carte de contact (email)
 @Composable
 fun OtherInfo(account: AccountData?, modifier: Modifier = Modifier) {
     Column(modifier = modifier.cardStyle()) {
         Text(stringResource(R.string.account_contact), color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            //Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.width(12.dp))
             Text(account?.email ?: "...", color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
 
+// Carte des réglages : thème et déconnexion
 @Composable
 fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
     val scope = rememberCoroutineScope()
@@ -206,7 +211,6 @@ fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
         Button(
             onClick = {
                 scope.launch {
-                    // Déconnexion locale même si le serveur ne répond pas
                     runCatching { supabase.auth.signOut() }
                     onLogout()
                 }

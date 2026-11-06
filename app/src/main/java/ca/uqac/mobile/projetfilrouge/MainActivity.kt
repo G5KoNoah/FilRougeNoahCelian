@@ -16,7 +16,9 @@ import ca.uqac.mobile.projetfilrouge.receiver.AlarmReceiver
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 import ca.uqac.mobile.projetfilrouge.viewModel.SettingsViewModel
 
+// Activité unique de l'app
 class MainActivity : ComponentActivity() {
+    // Lance la synchro des alarmes et affiche la navigation
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("Create","OnCreate")
@@ -24,7 +26,6 @@ class MainActivity : ComponentActivity() {
         stopVibrationIfFromAlarm(intent)
         AlarmSync(applicationContext).start(lifecycleScope)
         setContent {
-            // Même instance que celle de SettingsInfo (même activité) : le thème suit le switch
             val settingsViewModel: SettingsViewModel = viewModel()
             val estSombre by settingsViewModel.estSombre.collectAsStateWithLifecycle()
             ProjetFilRougeTheme(darkTheme = estSombre) {
@@ -33,46 +34,52 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // L'app était déjà ouverte quand on a touché la notification
+    // Arrête l'alarme si l'app est rouverte depuis sa notification
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         stopVibrationIfFromAlarm(intent)
     }
 
-    // Ouverte depuis la notification d'alarme : on arrête la vibration lancée par AlarmReceiver
+    // Coupe le son et la vibration si l'intent vient de la notification d'alarme
     private fun stopVibrationIfFromAlarm(intent: Intent?) {
         if (intent?.getBooleanExtra(AlarmReceiver.EXTRA_STOP_VIBRATION, false) == true) {
             AppVibrator(this).stop()
             AlarmSoundService.stop(this)
-            intent.removeExtra(AlarmReceiver.EXTRA_STOP_VIBRATION)   // évite de rejouer ça après une rotation
+            intent.removeExtra(AlarmReceiver.EXTRA_STOP_VIBRATION)
         }
     }
 
+    // Log du cycle de vie
     override fun onStart() {
         super.onStart()
         Log.d("Start", "OnStart")
     }
 
+    // Log du cycle de vie
     override fun onPause() {
         super.onPause()
         Log.d("Pause", "OnPause")
     }
 
+    // Log du cycle de vie
     override fun onStop() {
         super.onStop()
         Log.d("Stop", "OnStop")
     }
 
+    // Log du cycle de vie
     override fun onResume() {
         super.onResume()
         Log.d("Resume", "OnResume")
     }
 
+    // Log du cycle de vie
     override fun onRestart() {
         super.onRestart()
         Log.d("Restart", "OnRestart")
     }
 
+    // Log du cycle de vie
     override fun onDestroy() {
         super.onDestroy()
         Log.d("Destroy", "OnDestroy")
@@ -81,10 +88,10 @@ class MainActivity : ComponentActivity() {
 
 
 
+// Aperçu vide
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ProjetFilRougeTheme {
-        //LoginScreen()
     }
 }

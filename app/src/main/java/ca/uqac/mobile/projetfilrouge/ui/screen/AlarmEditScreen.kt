@@ -78,8 +78,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 
 
+// Écran de création et de modification d'une alarme
 @Composable
-// onPollStarted : après "Lancer le vote", on ouvre la salle de vote à la place de cet écran
 fun AlarmEditScreen(
     onBackScreen: ()-> Unit,
     onOpenVoteRoom: (String) -> Unit = {},
@@ -99,7 +99,6 @@ fun AlarmEditScreen(
         viewModel.error?.let {
             Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
-        // Les sections se répartissent sur toute la hauteur disponible ; sur un petit écran, on défile
         BoxWithConstraints(
             Modifier
                 .weight(1f)
@@ -112,7 +111,6 @@ fun AlarmEditScreen(
                 .heightIn(min = maxHeight),
             verticalArrangement = spreadVertically(min = 16.dp, max = 80.dp),
         ) {
-            // Heure et jours
             AppCard(contentPadding = PaddingValues(20.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     TimeSelector(
@@ -125,7 +123,6 @@ fun AlarmEditScreen(
                 }
             }
 
-            // Nom, sonnerie, rappel
             AppCard(contentPadding = PaddingValues(20.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     PillTextField(value = viewModel.name, onValueChange = { viewModel.onNameChange(it) }, placeholder = stringResource(R.string.alarm_name))
@@ -149,13 +146,11 @@ fun AlarmEditScreen(
                 }
             }
 
-            // Son et vibrations
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SwitchRow(stringResource(R.string.alarm_sound), checked = viewModel.sound, onCheckedChange = viewModel::onSoundChange)
                 SwitchRow(stringResource(R.string.alarm_vibrations), checked = viewModel.vibrations, onCheckedChange = viewModel::onVibrationsChange)
             }
 
-            // Vote : seulement pour une alarme partagée (le bouton "Lancer le vote" est en bas)
             if (viewModel.needsVote) {
                 AppCard(contentPadding = PaddingValues(20.dp)) {
                     Row(
@@ -177,7 +172,6 @@ fun AlarmEditScreen(
                 }
             }
 
-            // Membres
             AppCard(contentPadding = PaddingValues(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
@@ -188,7 +182,6 @@ fun AlarmEditScreen(
                         Icon(Icons.Outlined.PersonAddAlt, contentDescription = stringResource(R.string.alarm_add_member))
                     }
                 }
-                // Alarme partagée : seul l'ajout de membres s'enregistre directement
                 if (viewModel.needsVote && viewModel.newMembers.isNotEmpty()) {
                     PrimaryButton(
                         stringResource(R.string.alarm_save_members),
@@ -249,7 +242,6 @@ fun AlarmEditScreen(
         )
     }
 
-    // Choix des membres parmi mes contacts : rien n'est envoyé ici, l'ajout se fait au Save
     if (viewModel.showMemberPicker) {
         AlertDialog(
             onDismissRequest = viewModel::closeMemberPicker,
@@ -287,6 +279,7 @@ fun AlarmEditScreen(
     }
 }
 
+// Sélecteur heure:minute
 @Composable
 private fun TimeSelector(
     hour: Int,
@@ -308,6 +301,7 @@ private fun TimeSelector(
 private val WheelItemHeight = 68.dp
 private const val WheelLoops = 1000
 
+// Roue de nombres infinie qui s'aimante sur la valeur centrale
 @Composable
 private fun NumberWheel(count: Int, initial: Int, onValueChange: (Int) -> Unit) {
     val listState = rememberLazyListState(
@@ -350,6 +344,7 @@ private fun NumberWheel(count: Int, initial: Int, onValueChange: (Int) -> Unit) 
     }
 }
 
+// Sélection des jours de la semaine
 @Composable
 private fun DaysRow(selected: Set<Int>, onToggle: (Int) -> Unit) {
     val days = stringArrayResource(R.array.day_letters)
@@ -384,6 +379,7 @@ private fun DaysRow(selected: Set<Int>, onToggle: (Int) -> Unit) {
     }
 }
 
+// Sonnerie choisie, avec une croix pour revenir au défaut
 @Composable
 private fun RingtonePill(name: String?, onClear: () -> Unit) {
     Row(
@@ -423,8 +419,7 @@ private fun RingtonePill(name: String?, onClear: () -> Unit) {
     }
 }
 
-// Comme SpaceBetween, mais l'écart entre deux éléments reste entre min et max.
-// S'il reste de la place, le bloc est centré verticalement ; s'il en manque, on garde l'écart min (et l'écran défile).
+// Répartit les éléments avec un écart entre min et max, centrés
 private fun spreadVertically(min: Dp, max: Dp) = object : Arrangement.Vertical {
     override val spacing = min
 

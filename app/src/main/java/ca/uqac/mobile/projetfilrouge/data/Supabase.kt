@@ -23,8 +23,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-// URL et clé lues dans local.properties (voir app/build.gradle.kts).
-// La clé "publishable" est faite pour être embarquée dans l'app : la sécurité passe par les règles RLS (supabase/schema.sql)
 val supabase = createSupabaseClient(
     supabaseUrl = BuildConfig.SUPABASE_URL,
     supabaseKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
@@ -37,14 +35,12 @@ val supabase = createSupabaseClient(
 
 val currentUid: String? get() = supabase.auth.currentUserOrNull()?.id
 
-// Équivalent de l'AuthStateListener Firebase : émet l'uid à chaque connexion / déconnexion
 val uidChanges: Flow<String?> = supabase.auth.sessionStatus
     .filter { it !is SessionStatus.Initializing }
     .map { currentUid }
     .distinctUntilChanged()
 
-// Équivalent d'un addSnapshotListener : relance la requête à chaque changement de la table.
-// Les règles RLS limitent les événements reçus aux lignes que l'utilisateur a le droit de lire.
+// Relance fetch à chaque changement de la table (Realtime)
 fun <T> observeTable(table: String, fetch: suspend () -> T): Flow<T> = channelFlow {
     val channel = supabase.channel("$table-${UUID.randomUUID()}")
     val changes = channel.postgresChangeFlow<PostgresAction>(schema = "public") { this.table = table }

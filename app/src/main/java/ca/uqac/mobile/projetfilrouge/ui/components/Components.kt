@@ -70,22 +70,24 @@ private val AvatarColors = listOf(
     Color(0xFFCA5010), Color(0xFF8764B8), Color(0xFF498205), Color(0xFFD13438),
 )
 
-// La couleur dépend du nom : une même personne garde toujours la même
+// Couleur fixe dérivée du nom
 private fun avatarColor(name: String): Color = AvatarColors[(name.hashCode() and Int.MAX_VALUE) % AvatarColors.size]
 
-// "Jean Dupont" -> "JD", "jean" -> "J"
+// Initiales du premier et du dernier mot
 fun initialsOf(name: String): String {
     val words = name.split(' ').filter { it.isNotBlank() }
     val letters = if (words.size >= 2) listOf(words.first(), words.last()) else words
     return letters.joinToString("") { it.first().uppercase() }
 }
 
+// Onglets de la barre de navigation
 enum class NavTab(val route: String, val icon: ImageVector, @StringRes val labelRes: Int) {
     Alarms("alarms", Icons.Outlined.Alarm, R.string.tab_alarms),
     Contacts("contacts", Icons.Outlined.PermContactCalendar, R.string.tab_contacts),
     Profile("account", Icons.Outlined.Person, R.string.tab_profile),
 }
 
+// Mise en page de base d'un écran
 @Composable
 fun ScreenLayout(content: @Composable ColumnScope.() -> Unit) {
     Scaffold(
@@ -102,6 +104,7 @@ fun ScreenLayout(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+// Barre d'onglets du bas
 @Composable
 fun BottomNavBar(selectedTab: NavTab, onTabSelected: (NavTab) -> Unit) {
     Box(
@@ -137,6 +140,7 @@ fun BottomNavBar(selectedTab: NavTab, onTabSelected: (NavTab) -> Unit) {
     }
 }
 
+// Titre d'écran
 @Composable
 fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
     Text(
@@ -150,6 +154,7 @@ fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
     )
 }
 
+// En-tête avec bouton retour et titre
 @Composable
 fun BackHeader(title: String, onBack: () -> Unit = {}) {
     Box(
@@ -169,6 +174,7 @@ fun BackHeader(title: String, onBack: () -> Unit = {}) {
     }
 }
 
+// Carte arrondie de l'app
 @Composable
 fun AppCard(
     modifier: Modifier = Modifier,
@@ -184,6 +190,7 @@ fun AppCard(
     }
 }
 
+// Bouton principal, qui vibre au clic
 @Composable
 fun PrimaryButton(
     text: String,
@@ -206,6 +213,7 @@ fun PrimaryButton(
     }
 }
 
+// Bouton secondaire
 @Composable
 fun SecondaryButton(
     text: String,
@@ -227,6 +235,7 @@ fun SecondaryButton(
     }
 }
 
+// Switch réduit qui change d'état sans attendre la base
 @Composable
 fun SmallSwitch(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)? = null) {
     var shown by remember(checked) { mutableStateOf(checked) }
@@ -243,6 +252,7 @@ fun SmallSwitch(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)? = null) 
     )
 }
 
+// Carte avec un libellé et un switch
 @Composable
 fun SwitchRow(
     label: String,
@@ -258,11 +268,13 @@ fun SwitchRow(
     }
 }
 
+// Avatars par défaut pour count membres
 @Composable
 fun MemberAvatars(count: Int, modifier: Modifier = Modifier) {
     MemberAvatars(List(count) { null }, modifier)
 }
 
+// Rangée d'avatars des membres
 @Composable
 fun MemberAvatars(members: List<Friend?>, modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -270,7 +282,7 @@ fun MemberAvatars(members: List<Friend?>, modifier: Modifier = Modifier) {
     }
 }
 
-// Photo de profil, ou initiales sur un fond coloré (comme Teams) quand il n'y en a pas
+// Photo de profil, sinon initiales sur fond coloré
 @Composable
 fun UserAvatar(avatarUrl: String?, name: String?, modifier: Modifier = Modifier, size: Dp = 24.dp) {
     val initials = name?.let(::initialsOf).orEmpty()
@@ -305,6 +317,7 @@ fun UserAvatar(avatarUrl: String?, name: String?, modifier: Modifier = Modifier,
     }
 }
 
+// Champ texte arrondi et centré
 @Composable
 fun PillTextField(
     value: String,
@@ -336,6 +349,7 @@ fun PillTextField(
     )
 }
 
+// Menu déroulant arrondi
 @Composable
 fun PillDropdown(
     label: String,

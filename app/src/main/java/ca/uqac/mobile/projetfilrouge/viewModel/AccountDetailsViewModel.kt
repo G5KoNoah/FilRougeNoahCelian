@@ -27,9 +27,10 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
 
+// Profil de l'utilisateur connecté et gestion de sa photo
 class AccountDetailsViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    // Texte traduit depuis les ressources
     private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     val uid: String? = currentUid
@@ -47,7 +48,6 @@ class AccountDetailsViewModel(application: Application) : AndroidViewModel(appli
         if (uid == null) {
             _error.value = str(R.string.error_no_user)
         } else {
-            // L'écoute s'arrête toute seule quand le ViewModel est détruit (viewModelScope)
             viewModelScope.launch {
                 observeTable("accounts") {
                     supabase.from("accounts").select { filter { eq("id", uid) } }
@@ -66,6 +66,7 @@ class AccountDetailsViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    // Compresse et envoie la photo, puis met à jour avatar_url
     fun uploadAvatar(uri: Uri) {
         val userId = uid ?: return
         if (_isUploadingAvatar.value) return
@@ -92,8 +93,7 @@ class AccountDetailsViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    // On vide avatar_url d'abord : c'est ce qui fait revenir les initiales.
-    // Si le fichier ne peut pas être supprimé, il sera écrasé au prochain upload.
+    // Vide avatar_url puis supprime le fichier
     fun removeAvatar() {
         val userId = uid ?: return
         if (_isUploadingAvatar.value) return
@@ -113,6 +113,7 @@ class AccountDetailsViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    // Photo réduite, en JPEG
     private fun compressAvatar(uri: Uri): ByteArray {
         val bitmap = decodeScaled(uri) ?: error(str(R.string.avatar_error))
         return ByteArrayOutputStream().use { output ->
@@ -121,6 +122,7 @@ class AccountDetailsViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    // Décode l'image réduite à AVATAR_SIZE
     private fun decodeScaled(uri: Uri): Bitmap? {
         val resolver = getApplication<Application>().contentResolver
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

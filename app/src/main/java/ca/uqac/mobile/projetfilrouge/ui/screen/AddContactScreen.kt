@@ -45,6 +45,7 @@ import ca.uqac.mobile.projetfilrouge.ui.components.ScreenLayout
 import ca.uqac.mobile.projetfilrouge.ui.theme.ProjetFilRougeTheme
 import ca.uqac.mobile.projetfilrouge.viewModel.AddContactViewModel
 
+// Écran de recherche d'utilisateurs à ajouter
 @Composable
 fun AddContactScreen(onBack: () -> Unit) {
     val viewModel: AddContactViewModel = viewModel()
@@ -63,6 +64,7 @@ fun AddContactScreen(onBack: () -> Unit) {
     )
 }
 
+// Contenu de l'écran d'ajout de contact
 @Composable
 private fun AddContactContent(
     query: String,
@@ -121,11 +123,13 @@ private fun AddContactContent(
     }
 }
 
+// Texte d'aide grisé
 @Composable
 private fun HintText(text: String) {
     Text(text, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
 }
 
+// Résultat de recherche avec l'action selon la relation
 @Composable
 private fun UserCard(
     result: UserSearchResult,
@@ -155,6 +159,7 @@ private fun UserCard(
     }
 }
 
+// Aperçu de l'écran d'ajout de contact
 @Preview(showSystemUi = true)
 @Composable
 private fun AddContactScreenPreview() {

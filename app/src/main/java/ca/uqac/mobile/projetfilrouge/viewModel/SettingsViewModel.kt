@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 
 val Context.dataStore
         by preferencesDataStore(name = "parametres")
+// Préférences locales (thème)
 class PreferencesManager(private val context: Context) {
     private val CLE_EST_SOMBRE =
         booleanPreferencesKey("est_sombre")
@@ -24,6 +25,7 @@ class PreferencesManager(private val context: Context) {
             .map {
                     preferences -> preferences[CLE_EST_SOMBRE] ?: true
             }
+    // Enregistre le choix du thème
     suspend fun definirThemeSombre(sombre: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[CLE_EST_SOMBRE] = sombre
@@ -32,6 +34,7 @@ class PreferencesManager(private val context: Context) {
 }
 
 
+// Réglages de l'app
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesManager = PreferencesManager(application)
 
@@ -41,6 +44,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             SharingStarted.WhileSubscribed(5000),
             true
         )
+    // Active ou désactive le thème sombre
     fun basculerThemeSombre(sombre: Boolean) {
         viewModelScope.launch {
             preferencesManager.definirThemeSombre(sombre)

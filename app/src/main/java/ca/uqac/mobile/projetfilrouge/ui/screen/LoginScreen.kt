@@ -54,6 +54,7 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.coroutines.launch
 
+// Écran de connexion
 @Composable
 fun LoginScreen (onSignUp:()-> Unit, onLogin: () -> Unit){
     AuthLayout {
@@ -62,8 +63,7 @@ fun LoginScreen (onSignUp:()-> Unit, onLogin: () -> Unit){
     }
 }
 
-// Mise en page commune Login / Sign up : le contenu prend toute la largeur et est centré verticalement.
-// Il défile quand il ne tient pas (petit écran, clavier ouvert).
+// Mise en page centrée et défilante des écrans de connexion
 @Composable
 fun AuthLayout(content: @Composable ColumnScope.() -> Unit) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -78,7 +78,6 @@ fun AuthLayout(content: @Composable ColumnScope.() -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    // Au moins la hauteur de l'écran, sinon le centrage vertical n'a pas d'effet dans un scroll
                     .heightIn(min = maxHeight)
                     .padding(horizontal = 24.dp, vertical = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,13 +88,10 @@ fun AuthLayout(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+// Logo de l'app
 @Composable
 fun Logo(modifier: Modifier, verticalArrangement: Arrangement.Vertical) {
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
-        /*Image(
-            painter = painterResource(id = R.drawable.uqac_logo),
-            contentDescription = stringResource(R.string.logo_uqac)
-        )*/
         Icon(
             Icons.Outlined.AccessAlarm,
             contentDescription = "Logo Alarm",
@@ -106,6 +102,7 @@ fun Logo(modifier: Modifier, verticalArrangement: Arrangement.Vertical) {
 
 }
 
+// Formulaire de connexion Supabase
 @Composable
 fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()-> Unit) {
     var emailText by rememberSaveable { mutableStateOf("") }
@@ -151,7 +148,6 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
         Spacer(modifier = Modifier.height(24.dp))
         Button(
             onClick = {
-                // Supabase refuse la requête si un champ est vide : on vérifie avant
                 if (emailText.isBlank() || passwordText.isEmpty()) {
                     estErreur = true
                     message = context.getString(R.string.login_error_empty)

@@ -3,6 +3,7 @@ package ca.uqac.mobile.projetfilrouge.data
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// Alarme partagée entre ses membres
 @Serializable
 data class SharedAlarm(
     val id: String = "",
@@ -24,5 +25,6 @@ data class SharedAlarm(
 
     val requestCode: Int get() = id.hashCode()
 
+    // Vrai si l'utilisateur n'a pas désactivé l'alarme
     fun isEnabledFor(uid: String): Boolean = uid !in disabledBy
 }

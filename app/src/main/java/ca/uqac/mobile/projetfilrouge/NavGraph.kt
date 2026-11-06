@@ -26,9 +26,9 @@ import ca.uqac.mobile.projetfilrouge.ui.screen.SignScreen
 import ca.uqac.mobile.projetfilrouge.ui.screen.VoteRoomScreen
 import ca.uqac.mobile.projetfilrouge.data.currentUid
 
+// Navigation de l'app et barre d'onglets
 @Composable
 fun NavGraph() {
-    // Déjà connecté -> on démarre directement sur les alarmes. Calculé une seule fois.
     val startDestination = remember {
         if (currentUid != null) NavTab.Alarms.route else "login"
     }
@@ -120,7 +120,6 @@ fun NavGraph() {
                     navController.popBackStack()
                 })
             }
-            // Une salle de vote par alarme : VoteRoomViewModel lit alarmId dans son SavedStateHandle
             composable(
                 "voteRoom/{alarmId}",
                 arguments = listOf(navArgument("alarmId") { type = NavType.StringType }),

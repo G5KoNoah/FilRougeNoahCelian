@@ -17,15 +17,15 @@ import ca.uqac.mobile.projetfilrouge.R
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import kotlinx.serialization.json.Json
 
-// Appelé par le système quand une alarme planifiée par AlarmScheduler arrive à échéance
+// Déclenché à l'heure de l'alarme
 class AlarmReceiver : BroadcastReceiver() {
 
+    // Reprogramme l'alarme puis lance le son et/ou la vibration
     override fun onReceive(context: Context, intent: Intent) {
         val alarm = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM)
             ?.let { Json.decodeFromString(SharedAlarm.serializer(), it) }
         alarm?.let { AlarmScheduler(context).schedule(it) }
 
-        //Par default tout activer
         val sound = alarm?.sound ?: true
         val vibrations = alarm?.vibrations ?: true
         val title = intent.getStringExtra("name")
@@ -47,6 +47,7 @@ class AlarmReceiver : BroadcastReceiver() {
         private const val CHANNEL_ID = "alarm_v4"
         private val OUTDATED_CHANNELS = listOf("alarm_channel", "alarm_sound_v3", "alarm_silent_v3")
 
+        // Notification d'alarme avec l'action Stop
         fun buildNotification(context: Context, title: String?): Notification {
             val notificationManager = context.getSystemService(NotificationManager::class.java)
 
@@ -63,13 +64,11 @@ class AlarmReceiver : BroadcastReceiver() {
                 notificationManager.createNotificationChannel(channel)
             }
 
-            // Toucher la notification ouvre l'application ; MainActivity arrête alors la vibration
             val openAppIntent = PendingIntent.getActivity(
                 context, 0,
                 Intent(context, MainActivity::class.java).putExtra(EXTRA_STOP_VIBRATION, true),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
-            // Balayer la notification pour l'effacer : StopAlarmReceiver arrête la vibration
             val stopIntent = PendingIntent.getBroadcast(
                 context, 0, Intent(context, StopAlarmReceiver::class.java),
                 PendingIntent.FLAG_IMMUTABLE

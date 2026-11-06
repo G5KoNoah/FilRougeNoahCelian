@@ -24,9 +24,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+// Recherche d'utilisateurs et envoi de demandes d'ami
 class AddContactViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Les ViewModels n'ont pas de stringResource : on passe par l'Application, qui suit la langue de l'appareil
+    // Texte traduit depuis les ressources
     private fun str(@StringRes id: Int): String = getApplication<Application>().getString(id)
 
     private val me: String? = currentUid
@@ -85,6 +86,7 @@ class AddContactViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    // Lance la recherche 300 ms après la dernière frappe
     fun onQueryChange(value: String) {
         query = value
         error = null
@@ -113,10 +115,13 @@ class AddContactViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    // Envoie une demande d'ami
     fun sendRequest(user: Friend) = runAction(user) { myUid -> FriendRepository.sendRequest(myUid, user.uid) }
 
+    // Accepte la demande de cet utilisateur
     fun acceptRequest(user: Friend) = runAction(user) { myUid -> FriendRepository.acceptRequest(myUid, user.uid) }
 
+    // Exécute une action sur un utilisateur en bloquant les doubles clics
     private fun runAction(user: Friend, action: suspend (String) -> Unit) {
         val myUid = me ?: return
         if (user.uid in pendingUids) return
@@ -132,6 +137,7 @@ class AddContactViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    // Affiche l'erreur
     private fun showError(e: Throwable) {
         error = e.localizedMessage ?: str(R.string.error_server)
     }
