@@ -41,8 +41,8 @@
     <string name="account_theme">Thème :</string>
     <string name="account_logout">Se déconnecter</string>
     <string name="account_not_found">Profil introuvable</string>
-    <string name="avatar_description">Photo de profil</string>
     <string name="avatar_change">Changer la photo de profil</string>
+    <string name="avatar_remove">Retirer la photo</string>
     <string name="avatar_error">Impossible de mettre à jour la photo de profil</string>
 
     <!-- Liste des alarmes -->

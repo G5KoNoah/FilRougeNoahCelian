@@ -11,6 +11,8 @@ import androidx.lifecycle.viewModelScope
 import ca.uqac.mobile.projetfilrouge.R
 import ca.uqac.mobile.projetfilrouge.data.AlarmPoll
 import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
+import ca.uqac.mobile.projetfilrouge.data.Friend
+import ca.uqac.mobile.projetfilrouge.data.FriendRepository
 import ca.uqac.mobile.projetfilrouge.data.PollRepository
 import ca.uqac.mobile.projetfilrouge.data.PollVote
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
@@ -47,6 +49,15 @@ class VoteRoomViewModel(
     val alarm: StateFlow<SharedAlarm?> = AlarmRepository.observeAlarm(alarmId)
         .catch { e -> error = e.localizedMessage ?: str(R.string.error_server) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    // Profils des membres, pour afficher leur photo (ou leurs initiales) dans le cercle
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val memberProfiles: StateFlow<Map<String, Friend>> = alarm
+        .map { it?.members.orEmpty() }
+        .distinctUntilChanged()
+        .flatMapLatest { uids -> FriendRepository.observeProfiles(uids).catch { emit(emptyList()) } }
+        .map { profiles -> profiles.associateBy { it.uid } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     // Les propositions encore ouvertes ; celles dont le temps est écoulé sont filtrées à l'écran (isOpen(now))
     val polls: StateFlow<List<AlarmPoll>> = PollRepository.observePolls(alarmId)

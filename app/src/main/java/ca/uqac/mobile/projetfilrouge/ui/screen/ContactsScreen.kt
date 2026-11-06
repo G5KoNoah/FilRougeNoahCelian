@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -36,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ca.uqac.mobile.projetfilrouge.data.Friend
 import ca.uqac.mobile.projetfilrouge.data.FriendRequest
 import ca.uqac.mobile.projetfilrouge.ui.components.AppCard
+import ca.uqac.mobile.projetfilrouge.ui.components.UserAvatar
 import ca.uqac.mobile.projetfilrouge.ui.components.PrimaryButton
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenLayout
 import ca.uqac.mobile.projetfilrouge.ui.components.ScreenTitle
@@ -136,17 +138,22 @@ private fun SectionLabel(text: String) {
 private fun ContactCard(friend: Friend, onRemove: () -> Unit) {
     AppCard(contentPadding = PaddingValues(0.dp)) {
         Box(Modifier.fillMaxWidth()) {
-            Column(
+            Row(
                 Modifier
                     .align(Alignment.CenterStart)
-                    .padding(horizontal = 20.dp, vertical = 20.dp)
+                    .padding(start = 20.dp, end = 48.dp, top = 20.dp, bottom = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(friend.displayName, style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    friend.email,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                UserAvatar(friend.avatarUrl, friend.displayName, size = 40.dp)
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text(friend.displayName, style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        friend.email,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             IconButton(onClick = onRemove, modifier = Modifier.align(Alignment.TopEnd)) {
                 Icon(Icons.Outlined.RemoveCircleOutline, contentDescription = stringResource(R.string.contacts_remove_named, friend.displayName))

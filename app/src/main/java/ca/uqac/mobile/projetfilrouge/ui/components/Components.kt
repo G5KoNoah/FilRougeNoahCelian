@@ -51,6 +51,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import ca.uqac.mobile.projetfilrouge.data.Friend
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -62,6 +64,21 @@ import coil3.compose.AsyncImage
 
 val CardShape = RoundedCornerShape(12.dp)
 private val PillShape = RoundedCornerShape(8.dp)
+
+private val AvatarColors = listOf(
+    Color(0xFF4F6BED), Color(0xFFC239B3), Color(0xFF0078D4), Color(0xFF038387),
+    Color(0xFFCA5010), Color(0xFF8764B8), Color(0xFF498205), Color(0xFFD13438),
+)
+
+// La couleur dépend du nom : une même personne garde toujours la même
+private fun avatarColor(name: String): Color = AvatarColors[(name.hashCode() and Int.MAX_VALUE) % AvatarColors.size]
+
+// "Jean Dupont" -> "JD", "jean" -> "J"
+fun initialsOf(name: String): String {
+    val words = name.split(' ').filter { it.isNotBlank() }
+    val letters = if (words.size >= 2) listOf(words.first(), words.last()) else words
+    return letters.joinToString("") { it.first().uppercase() }
+}
 
 enum class NavTab(val route: String, val icon: ImageVector, @StringRes val labelRes: Int) {
     Alarms("alarms", Icons.Outlined.Alarm, R.string.tab_alarms),
@@ -235,16 +252,34 @@ fun MemberAvatars(count: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MemberAvatars(avatarUrls: List<String?>, modifier: Modifier = Modifier) {
+fun MemberAvatars(members: List<Friend?>, modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-        avatarUrls.forEach { MemberAvatar(it) }
+        members.forEach { UserAvatar(it?.avatarUrl, it?.displayName) }
     }
 }
 
+// Photo de profil, ou initiales sur un fond coloré (comme Teams) quand il n'y en a pas
 @Composable
-fun MemberAvatar(avatarUrl: String?, modifier: Modifier = Modifier, size: Dp = 24.dp) {
-    Box(modifier.size(size), contentAlignment = Alignment.Center) {
-        Icon(Icons.Outlined.AccountCircle, contentDescription = null, modifier = Modifier.matchParentSize())
+fun UserAvatar(avatarUrl: String?, name: String?, modifier: Modifier = Modifier, size: Dp = 24.dp) {
+    val initials = name?.let(::initialsOf).orEmpty()
+    Box(
+        modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(if (initials.isEmpty()) Color.Transparent else avatarColor(name.orEmpty())),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (initials.isEmpty()) {
+            Icon(Icons.Outlined.AccountCircle, contentDescription = null, modifier = Modifier.matchParentSize())
+        } else {
+            Text(
+                initials,
+                color = Color.White,
+                fontSize = with(LocalDensity.current) { (size * 0.4f).toSp() },
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+            )
+        }
         if (avatarUrl != null) {
             AsyncImage(
                 model = avatarUrl,

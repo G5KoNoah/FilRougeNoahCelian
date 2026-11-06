@@ -65,6 +65,9 @@ object FriendRepository {
             .sortedBy { it.displayName.lowercase() }
     }
 
+    // Se relance quand un compte change (photo, nom...) : les avatars se mettent à jour partout
+    fun observeProfiles(uids: List<String>): Flow<List<Friend>> = observeTable("accounts") { getFriends(uids) }
+
     // RLS : on ne reçoit que les amitiés dont on fait partie
     fun observeFriendUids(myUid: String): Flow<List<String>> = observeTable("friendships") {
         friendships.select().decodeList<FriendshipRow>()

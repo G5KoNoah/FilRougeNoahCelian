@@ -10,12 +10,19 @@ import ca.uqac.mobile.projetfilrouge.data.AlarmRepository
 import ca.uqac.mobile.projetfilrouge.data.PollRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.data.uidChanges
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import ca.uqac.mobile.projetfilrouge.data.Friend
 import ca.uqac.mobile.projetfilrouge.data.FriendRepository
 
 class SharedAlarmsViewModel(application: Application) : AndroidViewModel(application) {
@@ -29,8 +36,13 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
     private val _alarms = MutableStateFlow<List<SharedAlarm>>(emptyList())
     val alarms: StateFlow<List<SharedAlarm>> = _alarms.asStateFlow()
 
-    private val _memberAvatars = MutableStateFlow<Map<String, String?>>(emptyMap())
-    val memberAvatars: StateFlow<Map<String, String?>> = _memberAvatars.asStateFlow()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val memberProfiles: StateFlow<Map<String, Friend>> = _alarms
+        .map { alarms -> alarms.flatMap { it.members }.distinct().sorted() }
+        .distinctUntilChanged()
+        .flatMapLatest { uids -> FriendRepository.observeProfiles(uids).catch { emit(emptyList()) } }
+        .map { profiles -> profiles.associateBy { it.uid } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     // Votes ouverts sur mes alarmes : sert au compteur "votes en cours" de chaque carte
     private val _openPolls = MutableStateFlow<List<AlarmPoll>>(emptyList())

@@ -15,6 +15,8 @@ import ca.uqac.mobile.projetfilrouge.data.FriendRepository
 import ca.uqac.mobile.projetfilrouge.data.PollRepository
 import ca.uqac.mobile.projetfilrouge.data.SharedAlarm
 import ca.uqac.mobile.projetfilrouge.data.currentUid
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
@@ -132,18 +134,18 @@ class AlarmEditViewModel(
         loadMemberProfiles(alarm.members)
     }
 
+    private var memberProfilesJob: Job? = null
+
     private fun loadMemberProfiles(uids: List<String>) {
-        viewModelScope.launch {
-            try {
-                memberProfiles = memberProfiles + FriendRepository.getFriends(uids).associateBy { it.uid }
-            } catch (e: Exception) {
-                error = e.localizedMessage ?: str(R.string.error_server)
-            }
+        memberProfilesJob?.cancel()
+        memberProfilesJob = viewModelScope.launch {
+            FriendRepository.observeProfiles(uids)
+                .catch { e -> error = e.localizedMessage ?: str(R.string.error_server) }
+                .collect { profiles -> memberProfiles = profiles.associateBy { it.uid } }
         }
     }
 
-    fun avatarOf(uid: String): String? =
-        (memberProfiles[uid] ?: friends.find { it.uid == uid })?.avatarUrl
+    fun profileOf(uid: String): Friend? = memberProfiles[uid] ?: friends.find { it.uid == uid }
 
     fun onHourChange(value: Int) {
         hour = value
