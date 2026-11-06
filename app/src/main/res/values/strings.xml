@@ -5,6 +5,7 @@
     <string name="cancel">Cancel</string>
     <string name="accept">Accept</string>
     <string name="back">Back</string>
+    <string name="app_logo">App logo</string>
     <string name="error_no_user">No user signed in</string>
     <string name="error_server">Server error</string>
 

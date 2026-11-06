@@ -30,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,7 +76,7 @@ fun AccountScreen(onLogout: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            error?.let { Text(it, color = Color.Red, fontWeight = FontWeight.Bold) }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold) }
             MainInfo(
                 account = account,
                 isUploadingAvatar = isUploadingAvatar,
@@ -200,8 +199,7 @@ fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
                 onCheckedChange = { nouvelleValeur ->
                     viewModel.basculerThemeSombre(nouvelleValeur) },
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = Color.Black
+                    checkedTrackColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
@@ -216,8 +214,8 @@ fun SettingsInfo(modifier: Modifier = Modifier, onLogout: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.onSurface,
+                contentColor = MaterialTheme.colorScheme.surface,
             )
         ) {
             Text(stringResource(R.string.account_logout))

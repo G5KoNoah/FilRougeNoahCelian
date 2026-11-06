@@ -36,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ca.uqac.mobile.projetfilrouge.R
@@ -94,7 +93,7 @@ fun Logo(modifier: Modifier, verticalArrangement: Arrangement.Vertical) {
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
         Icon(
             Icons.Outlined.AccessAlarm,
-            contentDescription = "Logo Alarm",
+            contentDescription = stringResource(R.string.app_logo),
             modifier = Modifier.size(120.dp),
         )
     }
@@ -172,14 +171,14 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black,
+                containerColor = MaterialTheme.colorScheme.onSurface,
+                contentColor = MaterialTheme.colorScheme.surface,
             )
         ) {
             Text(
                 text = stringResource(R.string.login_button),
                 modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
                 fontSize = 20.sp,
-                color = Color.White,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -187,7 +186,7 @@ fun FormLogin(modifier: Modifier = Modifier, onSignUp: () -> Unit, onLogin: ()->
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = it,
-                color = if (estErreur) Color.Red else Color.Green,
+                color = if (estErreur) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
         }

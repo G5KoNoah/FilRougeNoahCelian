@@ -4,6 +4,7 @@
     <string name="cancel">Annuler</string>
     <string name="accept">Accepter</string>
     <string name="back">Retour</string>
+    <string name="app_logo">Logo de l\'app</string>
     <string name="error_no_user">Aucun utilisateur connecté</string>
     <string name="error_server">Erreur du serveur</string>
 

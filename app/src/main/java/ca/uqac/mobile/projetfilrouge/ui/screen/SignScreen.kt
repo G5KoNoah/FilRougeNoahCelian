@@ -24,7 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -68,7 +67,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .border(width = 2.dp, color = Color.Black, shape = forme)
+            .border(width = 2.dp, color = MaterialTheme.colorScheme.surfaceVariant, shape = forme)
             .background(color = MaterialTheme.colorScheme.surface, shape = forme)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -171,14 +170,14 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black,
+                containerColor = MaterialTheme.colorScheme.onSurface,
+                contentColor = MaterialTheme.colorScheme.surface,
             )
         ) {
             Text(
                 text = stringResource(R.string.sign_button),
                 modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
                 fontSize = 20.sp,
-                color = Color.White,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -187,7 +186,7 @@ fun FormSign(modifier: Modifier = Modifier, onLogin: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = it,
-                color = if (isError) Color.Red else Color.Green,
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
         }
