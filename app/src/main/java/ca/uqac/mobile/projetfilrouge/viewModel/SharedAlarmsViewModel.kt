@@ -36,6 +36,7 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
     private val _alarms = MutableStateFlow<List<SharedAlarm>>(emptyList())
     val alarms: StateFlow<List<SharedAlarm>> = _alarms.asStateFlow()
 
+    // Profils des membres de mes alarmes, mis à jour en direct (photo changée, retirée...)
     @OptIn(ExperimentalCoroutinesApi::class)
     val memberProfiles: StateFlow<Map<String, Friend>> = _alarms
         .map { alarms -> alarms.flatMap { it.members }.distinct().sorted() }
@@ -79,7 +80,6 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
                 .catch { e -> _error.value = e.localizedMessage ?: str(R.string.error_server) }
                 .collect { alarms ->
                     _alarms.value = alarms
-                    loadMemberAvatars(alarms.flatMap { it.members }.distinct())
                     observePollsOf(alarms.map { it.id }.sorted())
                 }
         }
@@ -94,17 +94,6 @@ class SharedAlarmsViewModel(application: Application) : AndroidViewModel(applica
             PollRepository.observeOpenPolls(alarmIds)
                 .catch { }
                 .collect { _openPolls.value = it }
-        }
-    }
-
-    private fun loadMemberAvatars(uids: List<String>) {
-        val missing = uids.filter { it !in _memberAvatars.value }
-        if (missing.isEmpty()) return
-        viewModelScope.launch {
-            runCatching { FriendRepository.getFriends(missing) }.onSuccess { profiles ->
-                val found = profiles.associate { it.uid to it.avatarUrl }
-                _memberAvatars.value = _memberAvatars.value + missing.associateWith { found[it] }
-            }
         }
     }
 
